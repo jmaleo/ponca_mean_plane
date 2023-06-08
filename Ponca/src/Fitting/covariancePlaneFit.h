@@ -13,6 +13,7 @@
 #include "./primitive.h"
 #include "./mean.h"          // used to define CovarianceLineFit
 #include "./covarianceFit.h" // use to define CovariancePlaneFit
+#include "./planeFrame.h"    // use to define CovariancePlaneFit
 
 #include <Eigen/Eigenvalues>
 
@@ -38,13 +39,12 @@ PONCA_FITTING_DECLARE_MATRIX_TYPE
 protected:
     enum
     {
-        Check = Base::PROVIDES_PLANE &&
-                Base::PROVIDES_POSITION_COVARIANCE,
+        Check = Base::PROVIDES_POSITION_COVARIANCE 
+            and Base::PROVIDES_PLANE_FRAME,
         /*!
-         * \brief Expose a method worldToTangentPlane(VectorType), which turns a point
+         * \brief Fit the tangent plane and store it into Plane and PlaneFrame which turn a point
          * in ambient 3D space to the tangent plane.
-         * \see worldToTangentPlane
-         * \see tangentPlaneToWorld
+         * \see PlaneFrame
          */
         PROVIDES_TANGENT_PLANE_BASIS
     };
@@ -53,31 +53,6 @@ public:
     PONCA_EXPLICIT_CAST_OPERATORS(CovariancePlaneFitImpl,covariancePlaneFit)
     PONCA_FITTING_DECLARE_FINALIZE
 
-    /**************************************************************************/
-    /* Results                                                                */
-    /**************************************************************************/
-
-    /*!
-     * \brief Express a point in ambient space relatively to the tangent plane.
-     *
-     * Output vector is: [h, u, v]^T, where u, v are 2d coordinates on the plane,
-     * and h the height of the sample.
-     * \tparam ignoreTranslation must be set to true when passing vectors instead of points
-     * \param _q Point coordinates expressed in ambient space
-     * \return Point coordinates expressed in local tangent frame
-     */
-    template <bool ignoreTranslation = false>
-    PONCA_MULTIARCH inline VectorType worldToTangentPlane(const VectorType &_q) const;
-
-    /*!
-     * \brief Transform a point from the tangent plane [h, u, v]^T to ambient space
-     *
-     * \tparam ignoreTranslation must be set to true when passing vectors instead of points
-     * \param _q Point coordinates expressed in local tangent frame
-     * \return Point coordinates expressed in ambient space
-     */
-    template <bool ignoreTranslation = false>
-    PONCA_MULTIARCH inline VectorType tangentPlaneToWorld(const VectorType &_q) const;
 }; //class CovariancePlaneFitImpl
 
 /// \brief Helper alias for Plane fitting on 3D points using CovariancePlaneFitImpl
@@ -87,7 +62,8 @@ public:
     CovariancePlaneFitImpl<DataPoint, _WFunctor,
             CovarianceFitBase<DataPoint, _WFunctor,
                     MeanPosition<DataPoint, _WFunctor,
-                            Plane<DataPoint, _WFunctor,T>>>>;
+                        PlaneFrame<DataPoint, _WFunctor,
+                            Plane<DataPoint, _WFunctor,T>>>>>;
 //! [CovariancePlaneFit Definition]
 
 /*!

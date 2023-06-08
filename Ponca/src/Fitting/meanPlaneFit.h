@@ -20,7 +20,8 @@ namespace Ponca
 
     \inherit Concept::FittingProcedureConcept
 
-    \see Plane, PlaneFrame
+    \see Plane
+    \see PlaneFrame
 */
 template < class DataPoint, class _WFunctor, typename T >
 class MeanPlaneFitImpl : public T

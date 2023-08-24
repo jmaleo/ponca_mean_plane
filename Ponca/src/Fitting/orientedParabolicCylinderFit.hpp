@@ -183,19 +183,115 @@ OrientedParabolicCylinderFitImpl<DataPoint, _WFunctor, T>::m_fitting_process () 
 
 }
 
+// template < class DataPoint, class _WFunctor, typename T>
+// void
+// OrientedParabolicCylinderFitImpl<DataPoint, _WFunctor, T>::m_ellipsoid_fitting () {
+//     const Scalar weight = 2 * Base::getWeightSum();
+//     const Scalar invSumW = Scalar(1.)/weight;
+
+//     const Matrix2 A = 2 * (weight * m_prodPP2D -  m_sumP2D * m_sumP2D.transpose());
+//     Matrix2 C = weight * m_prodPN2D - m_sumP2D * m_sumN2D.transpose();
+//     C = C + C.transpose().eval();
+
+//     Base::m_uq = -Internal::solve_symmetric_sylvester(A, C) / 2;
+//     Base::m_ul = invSumW * (m_sumN2D - Scalar(2) * Base::m_uq * m_sumP2D);
+//     Base::m_uc = - invSumW * ( Base::m_ul.dot(m_sumP2D) + (m_prodPP2D * Base::m_uq).trace() + m_sumH);
+// }
+
+// template < class DataPoint, class _WFunctor, typename T>
+// void
+// OrientedParabolicCylinderFitImpl<DataPoint, _WFunctor, T>::m_uq_parabolic_fitting() {
+//     PONCA_MULTIARCH_STD_MATH(abs);
+//     constexpr Scalar epsilon = Eigen::NumTraits<Scalar>::dummy_precision();
+
+//     Eigen::SelfAdjointEigenSolver<Eigen::Matrix2d> eig(Base::m_uq);
+//     Vector2 values = eig.eigenvalues();
+
+//     int higher = abs(values(0)) > abs(values(1)) ? 0 : 1;
+
+//     Scalar lambda0 = values(higher);
+//     Scalar lambda1 = values((higher + 1) % 2);
+//     Scalar t = Base::m_w.evalScale();
+
+//     // Compute alpha to put away the ambiguity of the solution
+//     Scalar alpha = 1;
+//     if (abs(lambda0) + 1/t > abs(epsilon))
+//         alpha = 2 * (abs(lambda0) - abs(lambda1)) / (abs(lambda0) + 1 / t);
+//     Base::m_a = ( alpha < Scalar(1) ) ? alpha : Scalar(1);
+
+//     const Eigen::MatrixXd eigenVec = eig.eigenvectors();
+//     Base::m_uq = eigenVec.col(higher) * eigenVec.col(higher).transpose();
+
+//     VectorType v1 = VectorType(0, eigenVec.col(1 - higher)(0), eigenVec.col(1 - higher)(1));
+//     VectorType v2 = VectorType(0, eigenVec.col(higher)(0), eigenVec.col(higher)(1));
+//     Base::m_v1 = Base::template localFrameToWorld<true>(v1);
+//     Base::m_v2 = Base::template localFrameToWorld<true>(v2);
+
+// }
+
+// template < class DataPoint, class _WFunctor, typename T>
+// void
+// OrientedParabolicCylinderFitImpl<DataPoint, _WFunctor, T>::m_a_parabolic_fitting () {
+    
+//     const Scalar weight = 2 * Base::getWeightSum();
+//     const Scalar invSumW = Scalar(1.)/weight;
+
+//     // Matrix2 Q = Base::m_uq * Base::m_uq.transpose();                       // 2x2
+//     Matrix2 Q_squared = Base::m_uq * Base::m_uq;                           // 2x2
+//     Scalar A = (m_prodPP2D.array() * Q_squared.array()).sum(); // 1
+//     Vector2 B = Base::m_uq * m_sumP2D;                                  // 2x2 * 2x1 = 2x1
+//     Scalar C = (m_prodPN2D.array() * Base::m_uq.array()).sum();         // 1
+
+//     Scalar first = invSumW * m_sumN2D.transpose() * B;         // 1 * 1x2 * 2x1 = 1
+//     Scalar second = invSumW * B.transpose() * B;               // 1 * 1x2 * 2x1 = 1
+
+//     Scalar a = - (C - first) / (4*A - second);                 // (1 - 1) / (1 * 1 - 1)
+//     Base::m_a *= a;
+
+// }
+
+// template < class DataPoint, class _WFunctor, typename T>
+// void
+// OrientedParabolicCylinderFitImpl<DataPoint, _WFunctor, T>::m_uc_ul_parabolic_fitting () {
+//     const Scalar weight = 2 * Base::getWeightSum();
+//     const Scalar invSumW = Scalar(1.)/weight;
+//     // Matrix2 Q = Base::m_uq * Base::m_uq.transpose();
+//     Vector2 B = Base::m_uq * m_sumP2D;
+//     Base::m_ul = invSumW * ( m_sumN2D - Base::m_a * B);
+
+
+//     Scalar A = Base::m_ul.transpose() * m_sumP2D;
+//     Scalar C = (m_prodPN2D.array() * Base::m_uq.array()).sum();
+//     Base::m_uc = - invSumW * (A + Base::m_a * C + m_sumH);
+// }
+
+// template < class DataPoint, class _WFunctor, typename T>
+// void
+// OrientedParabolicCylinderFitImpl<DataPoint, _WFunctor, T>::m_compute_curvature() {
+//     Scalar curv = - Scalar(2) * Base::m_a;
+//     if (curv <= 0) {
+//         Base::m_k1 = curv;
+//         Base::m_k2 = Scalar(0);
+//     }
+//     else {
+//         Base::m_k1 = Scalar(0);
+//         Base::m_k2 = curv;
+//     }
+// }
+
 template < class DataPoint, class _WFunctor, typename T>
 void
 OrientedParabolicCylinderFitImpl<DataPoint, _WFunctor, T>::m_ellipsoid_fitting () {
-    const Scalar weight = 2 * Base::getWeightSum();
+    const Scalar weight = Base::getWeightSum();
     const Scalar invSumW = Scalar(1.)/weight;
 
     const Matrix2 A = 2 * (weight * m_prodPP2D -  m_sumP2D * m_sumP2D.transpose());
     Matrix2 C = weight * m_prodPN2D - m_sumP2D * m_sumN2D.transpose();
     C = C + C.transpose().eval();
 
-    Base::m_uq = -Internal::solve_symmetric_sylvester(A, C) / 2;
+    Base::m_uq = Internal::solve_symmetric_sylvester(A, C);
     Base::m_ul = invSumW * (m_sumN2D - Scalar(2) * Base::m_uq * m_sumP2D);
-    Base::m_uc = - invSumW * ( Base::m_ul.dot(m_sumP2D) + (m_prodPP2D * Base::m_uq).trace() + m_sumH);
+    Base::m_uc = - invSumW * ( Base::m_ul.dot(m_sumP2D) + (m_prodPP2D * Base::m_uq).trace() - m_sumH);
 }
 
 template < class DataPoint, class _WFunctor, typename T>
@@ -222,8 +318,8 @@ OrientedParabolicCylinderFitImpl<DataPoint, _WFunctor, T>::m_uq_parabolic_fittin
     const Eigen::MatrixXd eigenVec = eig.eigenvectors();
     Base::m_uq = eigenVec.col(higher) * eigenVec.col(higher).transpose();
 
-    VectorType v1 = VectorType(0, eigenVec.col(higher)(0), eigenVec.col(higher)(1));
-    VectorType v2 = VectorType(0, eigenVec.col(1 - higher)(0), eigenVec.col(1 - higher)(1));
+    VectorType v1 = VectorType(0, eigenVec.col(1 - higher)(0), eigenVec.col(1 - higher)(1));
+    VectorType v2 = VectorType(0, eigenVec.col(higher)(0), eigenVec.col(higher)(1));
     Base::m_v1 = Base::template localFrameToWorld<true>(v1);
     Base::m_v2 = Base::template localFrameToWorld<true>(v2);
 
@@ -233,36 +329,31 @@ template < class DataPoint, class _WFunctor, typename T>
 void
 OrientedParabolicCylinderFitImpl<DataPoint, _WFunctor, T>::m_a_parabolic_fitting () {
     
-    const Scalar weight = 2 * Base::getWeightSum();
+    const Scalar weight = Base::getWeightSum();
     const Scalar invSumW = Scalar(1.)/weight;
 
-    // Matrix2 Q = Base::m_uq * Base::m_uq.transpose();                       // 2x2
-    Matrix2 Q_squared = Base::m_uq * Base::m_uq;                           // 2x2
-    Scalar A = (m_prodPP2D.array() * Q_squared.array()).sum(); // 1
-    Vector2 B = Base::m_uq * m_sumP2D;                                  // 2x2 * 2x1 = 2x1
-    Scalar C = (m_prodPN2D.array() * Base::m_uq.array()).sum();         // 1
+    // Matrix2 Q = Base::m_uq * Base::m_uq.transpose();                 // 2x2
+    Matrix2 Q_squared = Base::m_uq * Base::m_uq;                        // 2x2
 
-    Scalar first = invSumW * m_sumN2D.transpose() * B;         // 1 * 1x2 * 2x1 = 1
-    Scalar second = invSumW * B.transpose() * B;               // 1 * 1x2 * 2x1 = 1
+    Scalar A = - invSumW * m_sumN2D.transpose() * Base::m_uq * m_sumP2D;                  // 1
+    Scalar B = - (m_prodPN2D * Base::m_uq).trace();                                       // 1
+    Scalar C = (m_prodPP2D * Q_squared).trace();                                          // 1
+    Scalar D = - invSumW * (Base::m_uq * m_sumP2D).transpose() * Base::m_uq * m_sumP2D;   // 1
 
-    Scalar a = - (C - first) / (4*A - second);                 // (1 - 1) / (1 * 1 - 1)
+    Scalar a = (A + B) / (C + D);                                                         // (- 1 - 1) / (1 - 1)
+    
     Base::m_a *= a;
-
 }
 
 template < class DataPoint, class _WFunctor, typename T>
 void
 OrientedParabolicCylinderFitImpl<DataPoint, _WFunctor, T>::m_uc_ul_parabolic_fitting () {
-    const Scalar weight = 2 * Base::getWeightSum();
+    const Scalar weight = Base::getWeightSum();
     const Scalar invSumW = Scalar(1.)/weight;
-    // Matrix2 Q = Base::m_uq * Base::m_uq.transpose();
-    Vector2 B = Base::m_uq * m_sumP2D;
-    Base::m_ul = invSumW * ( m_sumN2D - Base::m_a * B);
 
+    Base::m_ul = invSumW * ( m_sumN2D - Base::m_a * Base::m_uq * m_sumP2D);
 
-    Scalar A = Base::m_ul.transpose() * m_sumP2D;
-    Scalar C = (m_prodPN2D.array() * Base::m_uq.array()).sum();
-    Base::m_uc = - invSumW * (A + Base::m_a * C + m_sumH);
+    Base::m_uc = - invSumW * ( Base::m_ul.dot(m_sumP2D) + (m_prodPP2D * Base::m_a * Base::m_uq).trace() - m_sumH);
 }
 
 template < class DataPoint, class _WFunctor, typename T>

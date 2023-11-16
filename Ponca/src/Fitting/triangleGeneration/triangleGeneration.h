@@ -88,6 +88,7 @@ protected:
 
 protected:
     //! \brief protected variables
+    VectorType _normale;
 
     std::array < Scalar, 6 > _cos;
     std::array < Scalar, 6 > _sin;
@@ -133,6 +134,8 @@ public:
     PONCA_MULTIARCH inline void init(const VectorType& _basisCenter)
     {
         Base::init(_basisCenter);
+
+        _normale = VectorType::Zero();
 
         k1 = Scalar(0);
         k2 = Scalar(0);

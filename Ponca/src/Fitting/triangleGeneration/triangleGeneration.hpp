@@ -4,7 +4,7 @@ bool
 TriangleGeneration<DataPoint, _WFunctor, T>::computeNeighbors(const DataPoint &evalPoint, const std::vector<VectorType>& _attribNeigs, const std::vector<VectorType>& _normNeigs){
     
     _nb_vt = 0; // Number of valid generated triangles
-    
+    _normale = evalPoint.normal();
     std::vector<int> indices(_attribNeigs.size());
 
     if (_method == Method::IndependentGeneration) {
@@ -46,16 +46,6 @@ TriangleGeneration<DataPoint, _WFunctor, T>::computeNeighbors(const DataPoint &e
             _triangles.push_back(Triangle<DataPoint>(points, normals));
             _nb_vt++;
         }
-    }
-
-    if (_A != Scalar(0)){
-        MatrixType _T;
-        _T  << _T11, _T12, _T13, 
-               _T12, _T22, _T23, 
-               _T13, _T23, _T33;
-        _T /= _A; 
-        std::tie (k1, k2, v1, v2) = CNCEigen::curvaturesFromTensor(_T, 1.0, evalPoint.normal());
-        return true;
     }
     
     return _nb_vt > 0;
@@ -99,7 +89,17 @@ TriangleGeneration<DataPoint, _WFunctor, T>::finalize () {
     _T23 = 0.5 * (localT(1,2) + localT(2,1));
     _T33 = localT(2,2);
 
-    return STABLE;
+    if (_A != Scalar(0)){
+        MatrixType _T;
+        _T  << _T11, _T12, _T13, 
+               _T12, _T22, _T23, 
+               _T13, _T23, _T33;
+        _T /= _A; 
+        std::tie (k1, k2, v1, v2) = CNCEigen::curvaturesFromTensor(_T, 1.0, _normale);
+        return STABLE;
+    }
+
+    return UNSTABLE;
 
 }
 

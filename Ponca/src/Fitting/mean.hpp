@@ -69,7 +69,6 @@ MeanPositionDer<DataPoint, _WFunctor, DiffType, T>::addLocalNeighbor(Scalar w,
     return false;
 }
 
-
 template<class DataPoint, class _WFunctor, int DiffType, typename T>
 void
 MeanNormalDer<DataPoint, _WFunctor, DiffType, T>::init(const VectorType &_evalPos) {
@@ -80,9 +79,9 @@ MeanNormalDer<DataPoint, _WFunctor, DiffType, T>::init(const VectorType &_evalPo
 template<class DataPoint, class _WFunctor, int DiffType, typename T>
 bool
 MeanNormalDer<DataPoint, _WFunctor, DiffType, T>::addLocalNeighbor(Scalar w,
-                                                                 const VectorType &localQ,
-                                                                 const DataPoint &attributes,
-                                                                 ScalarArray &dw) {
+                                                                const VectorType &localQ,
+                                                                const DataPoint &attributes,
+                                                                ScalarArray &dw) {
     if (Base::addLocalNeighbor(w, localQ, attributes, dw)) {
         m_dSumN += attributes.normal() * dw;
         return true;
@@ -90,3 +89,4 @@ MeanNormalDer<DataPoint, _WFunctor, DiffType, T>::addLocalNeighbor(Scalar w,
 
     return false;
 }
+

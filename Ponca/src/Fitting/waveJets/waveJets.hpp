@@ -39,7 +39,6 @@ WaveJets<DataPoint, _WFunctor, T>::finalize () {
 
         if (res == STABLE) {
             m_planeIsReady = true;
-            std::cout << "First finalize Num Neighbors : " << Base::getNumNeighbors() << std::endl;
             m_b.resize(Base::getNumNeighbors());
             m_M.resize(Base::getNumNeighbors(), m_ncolM);
             m_b.setZero();
@@ -51,16 +50,12 @@ WaveJets<DataPoint, _WFunctor, T>::finalize () {
     else {
 
         if (! m_normalIsCorrect){
-            std::cout << "Second finalize Num Neighbors : " << Base::getNumNeighbors() << std::endl;
             m_normalIsCorrect = true;
             FIT_RESULT res = m_correct_normal_process();
-            std::cout << "Correcting normal OK" << std::endl;
             return res;
         }
         else {
-            std::cout << "Third finalize Num Neighbors : " << Base::getNumNeighbors() << std::endl;
             FIT_RESULT res = m_jet_process();
-            std::cout << "Final Finalize OK" << std::endl;
             return res;
         }
     }
@@ -123,13 +118,10 @@ WaveJets<DataPoint, _WFunctor, T>::m_correct_normal_process(){
     VectorType t2c = nc.cross(t1c);
     t2c.normalize();
 
-    // m_M.setZero();
-    // m_b.setZero();
-    // reset m_M and m_b to compute the new normal
-    m_M.resize(Base::getNumNeighbors(), m_ncolM);
-    m_b.resize(Base::getNumNeighbors());
+    // reset m_M and m_b to compute with new normal
     m_M.setZero();
     m_b.setZero();
+    m_idx_j = 0;
 
     MatrixType B;
     B << nc, t1c, t2c;
@@ -162,15 +154,21 @@ WaveJets<DataPoint, _WFunctor, T>::m_jet_process(){
     //    const std::complex<Scalar> phi_0_0  = Phicorr(0);
     //    const std::complex<Scalar> phi_1_m1 = Phicorr(1);
     //    const std::complex<Scalar> phi_1_p1 = Phicorr(2);
-    const std::complex<Scalar> phi_2_m2 = Phicorr(3);
-    const std::complex<Scalar> phi_2_0  = Phicorr(4);
-    const std::complex<Scalar> phi_2_p2 = Phicorr(5);
+    // std::complex<Scalar> phi_2_m2 = Phicorr(3);
+    // std::complex<Scalar> phi_2_0  = Phicorr(4);
+    // std::complex<Scalar> phi_2_p2 = Phicorr(5);
+
+    // Check with the original code if there is a problem, because we're not supposed to take the first elements of Phicorr
+    std::complex<Scalar> phi_2_m2 = Phicorr(0);
+    std::complex<Scalar> phi_2_0  = Phicorr(1);
+    std::complex<Scalar> phi_2_p2 = Phicorr(2);
 
     // corrected normal !
-    const VectorType N = m_P.col(0); 
+    VectorType N = m_P.col(0); 
 
-    m_k1 = 2 * std::real(phi_2_0 + phi_2_p2 + phi_2_m2);
-    m_k2 = 2 * std::real(phi_2_0 - phi_2_p2 - phi_2_m2);
+
+    m_k1 = Scalar(2) * Scalar(std::real(phi_2_0 + phi_2_p2 + phi_2_m2));
+    m_k2 = Scalar(2) * Scalar(std::real(phi_2_0 - phi_2_p2 - phi_2_m2));
 
     if(m_k2 < m_k1) std::swap(m_k1, m_k2);
 
@@ -180,13 +178,5 @@ WaveJets<DataPoint, _WFunctor, T>::m_jet_process(){
 
     return Base::m_eCurrentState = STABLE;
 }
-
-
-
-
-
-
-
-
-
-// need to use the convertion like this : Base::worldToLocalFrame(_q);
+    
+    

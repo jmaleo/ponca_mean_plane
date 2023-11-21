@@ -95,9 +95,9 @@ public:
         return primitiveGradient();
     }
 
-    PONCA_MULTIARCH inline Scalar kmin () const { return m_k2; }
+    PONCA_MULTIARCH inline Scalar kmin () const { return m_k1; }
 
-    PONCA_MULTIARCH inline Scalar kmax () const { return m_k1; }
+    PONCA_MULTIARCH inline Scalar kmax () const { return m_k2; }
 
     PONCA_MULTIARCH inline Scalar kMean () const { return (m_k1 + m_k2) / Scalar(2); }
 

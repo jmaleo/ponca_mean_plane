@@ -66,17 +66,15 @@ TriangleGeneration<DataPoint, _WFunctor, T>::finalize () {
         // Simple estimation. 
         const auto& tA = _triangles[t].mu0InterpolatedU();
         if (tA < - CNCEigen::epsilon) {
-            _A -= tA;
-            _H += _triangles[t].mu1InterpolatedU();
-            _G += _triangles[t].mu2InterpolatedU();
-            // add point wise tensor
-
+            _A     -= tA;
+            _H     += _triangles[t].mu1InterpolatedU();
+            _G     += _triangles[t].mu2InterpolatedU();
             localT += _triangles[t].muXYInterpolatedU();
         }
         else if (tA > CNCEigen::epsilon) {
-            _A += tA;
-            _H -= _triangles[t].mu1InterpolatedU();
-            _G += _triangles[t].mu2InterpolatedU();
+            _A     += tA;
+            _H     += _triangles[t].mu1InterpolatedU();
+            _G     += _triangles[t].mu2InterpolatedU();
             localT += _triangles[t].muXYInterpolatedU();
         }
 
@@ -95,7 +93,7 @@ TriangleGeneration<DataPoint, _WFunctor, T>::finalize () {
                _T12, _T22, _T23, 
                _T13, _T23, _T33;
         _T /= _A; 
-        std::tie (k1, k2, v1, v2) = CNCEigen::curvaturesFromTensor(_T, 1.0, _normale);
+        std::tie (k2, k1, v2, v1) = CNCEigen::curvaturesFromTensor(_T, 1.0, _normale);
         return STABLE;
     }
 

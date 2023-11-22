@@ -83,8 +83,8 @@ WaveJets<DataPoint, _WFunctor, T>::m_local_jet_pass(const VectorType& localPos){
     Scalar w = std::exp(-normalized_r * normalized_r/18.0);
 
     // Compute the coefficients of the polynomial
-    int idx = 0; 
-    for (int k = 0; k < m_order; k++){
+    int idx = 0;
+    for (int k = 0; k <= m_order; ++k){
         Scalar rk = std::pow(normalized_r, k);
         for(int n = -k; n <= k; n += 2){
             m_M(m_idx_j,idx) = rk * std::exp(I * Scalar(n) * theta) * w;
@@ -154,14 +154,14 @@ WaveJets<DataPoint, _WFunctor, T>::m_jet_process(){
     //    const std::complex<Scalar> phi_0_0  = Phicorr(0);
     //    const std::complex<Scalar> phi_1_m1 = Phicorr(1);
     //    const std::complex<Scalar> phi_1_p1 = Phicorr(2);
-    // std::complex<Scalar> phi_2_m2 = Phicorr(3);
-    // std::complex<Scalar> phi_2_0  = Phicorr(4);
-    // std::complex<Scalar> phi_2_p2 = Phicorr(5);
+    std::complex<Scalar> phi_2_m2 = Phicorr(3);
+    std::complex<Scalar> phi_2_0  = Phicorr(4);
+    std::complex<Scalar> phi_2_p2 = Phicorr(5);
 
     // Check with the original code if there is a problem, because we're not supposed to take the first elements of Phicorr
-    std::complex<Scalar> phi_2_m2 = Phicorr(0);
-    std::complex<Scalar> phi_2_0  = Phicorr(1);
-    std::complex<Scalar> phi_2_p2 = Phicorr(2);
+    // std::complex<Scalar> phi_2_m2 = Phicorr(0);
+    // std::complex<Scalar> phi_2_0  = Phicorr(1);
+    // std::complex<Scalar> phi_2_p2 = Phicorr(2);
 
     // corrected normal !
     VectorType N = m_P.col(0); 

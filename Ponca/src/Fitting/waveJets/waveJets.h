@@ -33,6 +33,7 @@ public:
     PONCA_EXPLICIT_CAST_OPERATORS(WaveJets, waveJets)
     PONCA_FITTING_DECLARE_FINALIZE
     PONCA_FITTING_DECLARE_ADDNEIGHBOR
+
 protected:
 
     using Vector2 = Eigen::Matrix<Scalar, 2, 1>;
@@ -43,7 +44,7 @@ protected:
 
     Eigen::Matrix<std::complex<Scalar>, Eigen::Dynamic, Eigen::Dynamic> m_M; // Matrix of the system
     Eigen::Matrix<std::complex<Scalar>, Eigen::Dynamic, 1>              m_b; // Vector of the system
-    int m_idx_j = 0; // Index of the current neighbor when computing addNeighbors
+    int m_idx_j = 0; // Index of the current neighbor  when computing addNeighbors
 
     // Curvature info
     Scalar     m_k1;

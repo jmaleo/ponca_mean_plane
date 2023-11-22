@@ -105,7 +105,6 @@ protected:
     Scalar _T23 {0}; // T23
     Scalar _T33 {0}; // T33
 
-
     Scalar k1 {0};
     Scalar k2 {0};
 

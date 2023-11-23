@@ -9,8 +9,11 @@ TriangleGeneration<DataPoint, _WFunctor, T>::computeNeighbors(const DataPoint &e
 
     if (_method == Method::IndependentGeneration) {
         // Shuffle the neighbors
-        std::iota(indices.begin(), indices.end(), 0);
-        std::random_shuffle(indices.begin(), indices.end());
+        for (int i = 0; i < indices.size(); ++i)
+            indices[i] = i;
+        std::random_device rd;
+        std::mt19937 rg(rd());
+        std::shuffle(indices.begin(), indices.end(), rg);
 
         // Compute the triangles
         _triangles.clear();
@@ -64,12 +67,12 @@ TriangleGeneration<DataPoint, _WFunctor, T>::finalize () {
     for (int t = 0; t < _nb_vt; ++t) {
 
         // Simple estimation. 
-        const auto& tA = _triangles[t].mu0InterpolatedU();
+        Scalar tA = _triangles[t].mu0InterpolatedU();
         if (tA < - CNCEigen::epsilon) {
             _A     -= tA;
-            _H     += _triangles[t].mu1InterpolatedU();
-            _G     += _triangles[t].mu2InterpolatedU();
-            localT += _triangles[t].muXYInterpolatedU();
+            _H     += _triangles[t].mu1InterpolatedU(true);
+            _G     += _triangles[t].mu2InterpolatedU(true);
+            localT += _triangles[t].muXYInterpolatedU(true);
         }
         else if (tA > CNCEigen::epsilon) {
             _A     += tA;
@@ -87,17 +90,24 @@ TriangleGeneration<DataPoint, _WFunctor, T>::finalize () {
     _T23 = 0.5 * (localT(1,2) + localT(2,1));
     _T33 = localT(2,2);
 
+    MatrixType _T;
+
     if (_A != Scalar(0)){
-        MatrixType _T;
         _T  << _T11, _T12, _T13, 
                _T12, _T22, _T23, 
                _T13, _T23, _T33;
         _T /= _A; 
-        std::tie (k2, k1, v2, v1) = CNCEigen::curvaturesFromTensor(_T, 1.0, _normale);
-        return STABLE;
+        _H /= _A;
+        _G /= _A;
+    }
+    else {
+        _H = Scalar(0);
+        _G = Scalar(0);
     }
 
-    return UNSTABLE;
+    std::tie (k2, k1, v2, v1) = CNCEigen::curvaturesFromTensor(_T, 1.0, _normale);
+
+    return STABLE;
 
 }
 
@@ -110,11 +120,16 @@ TriangleGeneration<DataPoint, _WFunctor, T>::construct_hexa(const DataPoint &eva
     VectorType a;
     a.setZero();
 
+    int iSource = -1;
     Scalar avgd = Scalar(0);
 
     for ( int i = 0 ; i < _attribNeigs.size() ; i++ ) {
         avgd += ( _attribNeigs[ i ] - c ).norm();
         a    += _normNeigs[ i ];
+        // if avgd == 0 then it is the evalPoint
+        if ( iSource == -1 && _attribNeigs[ i ] == c  ) {
+            iSource = i;
+        }
     }
     
     a /= a.norm();
@@ -135,7 +150,7 @@ TriangleGeneration<DataPoint, _WFunctor, T>::construct_hexa(const DataPoint &eva
     u /= u.norm();
     v /= v.norm();
 
-    std::array<int, 6> indices = {0, 1, 2, 3, 4, 5};
+    std::array<int, 6> indices = {iSource, iSource, iSource, iSource, iSource, iSource};
 
     for ( int i = 0 ; i < 6 ; i++ ){
         _distance2 [ i ] = avgd * avgd;
@@ -144,7 +159,11 @@ TriangleGeneration<DataPoint, _WFunctor, T>::construct_hexa(const DataPoint &eva
 
     for ( int i = 0 ; i < _attribNeigs.size() ; i++ ){
         VectorType p = _attribNeigs[ i ];
-        if ( p == c ) continue;
+        if ( p == c ){
+            std::cout << "p == c" << std::endl;
+            continue;
+        } 
+            
         const VectorType d = p - c;
         for ( int j = 0 ; j < 6 ; j++ ){
             const Scalar d2 = ( d - _targets[ j ]).squaredNorm();

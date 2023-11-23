@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "../defines.h"
+#include <Ponca/Fitting>
 
 #include PONCA_MULTIARCH_INCLUDE_STD(cmath)
 #include PONCA_MULTIARCH_INCLUDE_STD(limits)
@@ -215,7 +215,7 @@ public:
 
     PONCA_MULTIARCH inline Scalar kMean() { return _H; }
 
-    PONCA_MULTIARCH inline Scalar kgauss() { return _G; }
+    PONCA_MULTIARCH inline Scalar GaussianCurvature() { return _G; }
 
 private: 
 

@@ -178,5 +178,3 @@ WaveJets<DataPoint, _WFunctor, T>::m_jet_process(){
 
     return Base::m_eCurrentState = STABLE;
 }
-    
-    

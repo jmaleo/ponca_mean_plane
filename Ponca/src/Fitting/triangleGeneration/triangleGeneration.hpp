@@ -11,7 +11,9 @@ TriangleGeneration<DataPoint, _WFunctor, T>::computeNeighbors(const DataPoint &e
         // Shuffle the neighbors
         for (int i = 0; i < indices.size(); ++i)
             indices[i] = i;
-        std::random_shuffle(indices.begin(), indices.end());
+        std::random_device rd;
+        std::mt19937 rg(rd());
+        std::shuffle(indices.begin(), indices.end(), rg);
 
         // Compute the triangles
         _triangles.clear();
@@ -68,9 +70,9 @@ TriangleGeneration<DataPoint, _WFunctor, T>::finalize () {
         Scalar tA = _triangles[t].mu0InterpolatedU();
         if (tA < - CNCEigen::epsilon) {
             _A     -= tA;
-            _H     += _triangles[t].mu1InterpolatedU();
-            _G     += _triangles[t].mu2InterpolatedU();
-            localT += _triangles[t].muXYInterpolatedU();
+            _H     += _triangles[t].mu1InterpolatedU(true);
+            _G     += _triangles[t].mu2InterpolatedU(true);
+            localT += _triangles[t].muXYInterpolatedU(true);
         }
         else if (tA > CNCEigen::epsilon) {
             _A     += tA;

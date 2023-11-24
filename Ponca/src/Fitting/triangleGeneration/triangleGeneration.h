@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "../defines.h"
+#include <Ponca/Fitting>
 
 #include PONCA_MULTIARCH_INCLUDE_STD(cmath)
 #include PONCA_MULTIARCH_INCLUDE_STD(limits)
@@ -43,13 +43,25 @@ struct Triangle {
             return !((*this) == other);
         }
 
-        inline Scalar mu0InterpolatedU      () { return CNCEigen::mu0InterpolatedU  (points[0], points[1], points[2], normals[0], normals[1], normals[2]); }
+        inline Scalar mu0InterpolatedU      () { 
+            return CNCEigen::mu0InterpolatedU  (points[0], points[1], points[2], normals[0], normals[1], normals[2]);
+        }
 
-        inline Scalar mu1InterpolatedU      () { return CNCEigen::mu1InterpolatedU  (points[0], points[1], points[2], normals[0], normals[1], normals[2]); }
+        inline Scalar mu1InterpolatedU      (bool differentOrder = false) { 
+            return (differentOrder) ? 
+                  CNCEigen::mu1InterpolatedU  (points[0], points[2], points[1], normals[0], normals[2], normals[1])
+                : CNCEigen::mu1InterpolatedU  (points[0], points[1], points[2], normals[0], normals[1], normals[2]); 
+        }
+        inline Scalar mu2InterpolatedU      (bool differentOrder = false) { 
+            return (differentOrder) ? 
+                  CNCEigen::mu2InterpolatedU  (points[0], points[2], points[1], normals[0], normals[2], normals[1]) 
+                : CNCEigen::mu2InterpolatedU  (points[0], points[1], points[2], normals[0], normals[1], normals[2]); 
+            }
 
-        inline Scalar mu2InterpolatedU      () { return CNCEigen::mu2InterpolatedU  (points[0], points[1], points[2], normals[0], normals[1], normals[2]); }
-
-        inline MatrixType muXYInterpolatedU () { return CNCEigen::muXYInterpolatedU (points[0], points[1], points[2], normals[0], normals[1], normals[2]); }
+        inline MatrixType muXYInterpolatedU (bool differentOrder = false) { 
+            return (differentOrder) ? 
+                  CNCEigen::muXYInterpolatedU (points[0], points[2], points[1], normals[0], normals[2], normals[1])
+                : CNCEigen::muXYInterpolatedU (points[0], points[1], points[2], normals[0], normals[1], normals[2]); }
 
 };
 
@@ -130,11 +142,9 @@ public:
     /*! \brief Set the scalar field values to 0 and reset the isNormalized() status
 
     */
-    PONCA_MULTIARCH inline void init(const VectorType& _basisCenter)
+    PONCA_MULTIARCH inline void init (const VectorType& _basisCenter)
     {
         Base::init(_basisCenter);
-
-        _normale = VectorType::Zero();
 
         k1 = Scalar(0);
         k2 = Scalar(0);
@@ -203,7 +213,7 @@ public:
 
     PONCA_MULTIARCH inline Scalar kMean() { return _H; }
 
-    PONCA_MULTIARCH inline Scalar kgauss() { return _G; }
+    PONCA_MULTIARCH inline Scalar GaussianCurvature() { return _G; }
 
 private: 
 

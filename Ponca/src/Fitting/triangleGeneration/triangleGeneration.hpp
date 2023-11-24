@@ -11,7 +11,9 @@ TriangleGeneration<DataPoint, _WFunctor, T>::computeNeighbors(const DataPoint &e
         // Shuffle the neighbors
         for (int i = 0; i < indices.size(); ++i)
             indices[i] = i;
-        std::random_shuffle(indices.begin(), indices.end());
+        std::random_device rd;
+        std::mt19937 rg(rd());
+        std::shuffle(indices.begin(), indices.end(), rg);
 
         // Compute the triangles
         _triangles.clear();
@@ -68,9 +70,9 @@ TriangleGeneration<DataPoint, _WFunctor, T>::finalize () {
         Scalar tA = _triangles[t].mu0InterpolatedU();
         if (tA < - CNCEigen::epsilon) {
             _A     -= tA;
-            _H     += _triangles[t].mu1InterpolatedU();
-            _G     += _triangles[t].mu2InterpolatedU();
-            localT += _triangles[t].muXYInterpolatedU();
+            _H     += _triangles[t].mu1InterpolatedU(true);
+            _G     += _triangles[t].mu2InterpolatedU(true);
+            localT += _triangles[t].muXYInterpolatedU(true);
         }
         else if (tA > CNCEigen::epsilon) {
             _A     += tA;
@@ -105,6 +107,11 @@ TriangleGeneration<DataPoint, _WFunctor, T>::finalize () {
 
     std::tie (k2, k1, v2, v1) = CNCEigen::curvaturesFromTensor(_T, 1.0, _normale);
 
+    if (k1 > k2) {
+        std::swap(k1, k2);
+        std::swap(v1, v2);
+    }
+
     return STABLE;
 
 }
@@ -135,13 +142,13 @@ TriangleGeneration<DataPoint, _WFunctor, T>::construct_hexa(const DataPoint &eva
     n /= n.norm();
     avgd /= _attribNeigs.size();
 
-    const int m = ( std::abs( n[0] ) > std::abs ( n[1] ))
-            ? ( ( std::abs( n[0] ) ) > std::abs( n[2] ) ? 0 : 2 )
-            : ( ( std::abs( n[1] ) ) > std::abs( n[2] ) ? 1 : 2 );
+    const int m = ( std::fabs( n[0] ) > std::fabs ( n[1] ))
+            ? ( ( std::fabs( n[0] ) ) > std::fabs( n[2] ) ? 0 : 2 )
+            : ( ( std::fabs( n[1] ) ) > std::fabs( n[2] ) ? 1 : 2 );
     const VectorType e = 
-        ( m == 0 ) ? VectorType( Scalar(0), Scalar(1), Scalar(0) ) : 
-        ( m == 1 ) ? VectorType( Scalar(0), Scalar(0), Scalar(1) ) :
-        VectorType( Scalar(1), Scalar(0), Scalar(0) );
+        ( m == 0 ) ? VectorType( 0.0, 1.0, 0.0 ) : 
+        ( m == 1 ) ? VectorType( 0.0, 0.0, 1.0 ) :
+        VectorType( 1.0, 0.0, 0.0 );
 
     VectorType u = n.cross( e );
     VectorType v = n.cross( u );
@@ -157,14 +164,11 @@ TriangleGeneration<DataPoint, _WFunctor, T>::construct_hexa(const DataPoint &eva
 
     for ( int i = 0 ; i < _attribNeigs.size() ; i++ ){
         VectorType p = _attribNeigs[ i ];
-        if ( p == c ){
-            std::cout << "p == c" << std::endl;
-            continue;
-        } 
+        if ( p == c ) continue;
             
-        const VectorType d = p - c;
+        const VectorType w = p - c;
         for ( int j = 0 ; j < 6 ; j++ ){
-            const Scalar d2 = ( d - _targets[ j ]).squaredNorm();
+            const Scalar d2 = ( w - _targets[ j ]).squaredNorm();
             if ( d2 < _distance2[ j ] ){
                 indices[ j ] = i;
                 _distance2[ j ] = d2;
@@ -187,8 +191,9 @@ template < class DataPoint, class _WFunctor, typename T>
 void
 TriangleGeneration<DataPoint, _WFunctor, T>::construct_avgHexa(const DataPoint &evalPoint, const std::vector<VectorType>& _attribNeigs, const std::vector<VectorType>& _normNeigs) {
     
-    VectorType c = evalPoint.pos();
-    VectorType n = evalPoint.normal();
+    const VectorType c = evalPoint.pos();
+    const VectorType ni = evalPoint.normal();
+    VectorType n = ni;
     Scalar avgd = Scalar(0);
     VectorType a;
     a.setZero();
@@ -197,23 +202,25 @@ TriangleGeneration<DataPoint, _WFunctor, T>::construct_avgHexa(const DataPoint &
     std::array< VectorType,6 > array_avg_points;  
     std::array< size_t, 6 >    array_nb;
 
-    for ( int i = 0 ; i < _attribNeigs.size() ; i++ ) {
-        avgd += ( _attribNeigs[ i ] - c ).norm();
-        a    += _normNeigs[ i ];
+    for ( int j = 0 ; j < _attribNeigs.size() ; j++ ) {
+        avgd += ( _attribNeigs[ j ] - c ).norm();
+        a    += _normNeigs[ j ];
     }
 
-    a /= a.norm();
-    n = ( Scalar(1) - _avgnormals ) * n + _avgnormals * a;
-    n /= n.norm();
+    a    /= a.norm();
+    n     = ( 1.0 - _avgnormals ) * n + _avgnormals * a;
+    n    /= n.norm();
     avgd /= _attribNeigs.size();
 
-    const int m = ( std::abs( n[0] ) > std::abs ( n[1] ))
-            ? ( ( std::abs( n[0] ) ) > std::abs( n[2] ) ? 0 : 2 )
-            : ( ( std::abs( n[1] ) ) > std::abs( n[2] ) ? 1 : 2 );
-    const VectorType e =
-        ( m == 0 ) ? VectorType( Scalar(0), Scalar(1), Scalar(0) ) :
-        ( m == 1 ) ? VectorType( Scalar(0), Scalar(0), Scalar(1) ) :
-        VectorType( Scalar(1), Scalar(0), Scalar(0) );
+
+    const int m = ( std::fabs( n[ 0 ] ) > std::fabs ( n[ 1 ] ) )
+            ? ( ( std::fabs( n[ 0 ] ) ) > std::fabs( n[ 2 ] ) ? 0 : 2 )
+            : ( ( std::fabs( n[ 1 ] ) ) > std::fabs( n[ 2 ] ) ? 1 : 2 );
+    const VectorType e = 
+        ( m == 0 ) ? VectorType( 0.0, 1.0, 0.0 ) : 
+        ( m == 1 ) ? VectorType( 0.0, 0.0, 1.0 ) :
+        VectorType( 1.0, 0.0, 0.0 );
+
     VectorType u = n.cross( e );
     VectorType v = n.cross( u );
     u /= u.norm();
@@ -227,14 +234,17 @@ TriangleGeneration<DataPoint, _WFunctor, T>::construct_avgHexa(const DataPoint &
         array_nb[i] = 0;
     }
 
+    for ( auto k = 0; k < 6; k++ )
+        std::cout << _targets[ k ][0] << " " << _targets[ k ][1] << " " << _targets[ k ][2] << std::endl;
+
     for (int i = 0 ; i < _attribNeigs.size() ; i++ ){
-        VectorType p = _attribNeigs[ i ] - c;
-        auto best_k = 0;
-        auto best_d2 = ( p - _targets[ 0 ] ).squaredNorm();
-        for (int k = 1 ; k < 6 ; k++ ){
-            const Scalar d2 = ( p - _targets[ k ] ).squaredNorm();
+        VectorType w = _attribNeigs[ i ] - c;
+        int best_k = 0;
+        double best_d2 = ( w - _targets[ 0 ] ).squaredNorm();
+        for (auto k = 1 ; k < 6 ; k++ ){
+            const double d2 = ( w - _targets[ k ] ).squaredNorm();
             if ( d2 < best_d2 ){
-                best_k = k;
+                best_k  = k;
                 best_d2 = d2;
             }
         }
@@ -245,12 +255,12 @@ TriangleGeneration<DataPoint, _WFunctor, T>::construct_avgHexa(const DataPoint &
 
     for (int i = 0 ; i < 6 ; i++ ){
         if ( array_nb[ i ] == 0 ) {
-            array_avg_normals[ i ] = n;
-            array_avg_points[ i ] = c;
+            array_avg_normals[ i ] = evalPoint.normal();
+            array_avg_points [ i ] = evalPoint.pos();
         }
         else {
             array_avg_normals[ i ] /= array_avg_normals[ i ].norm();
-            array_avg_points[ i ] /= array_nb[ i ];
+            array_avg_points [ i ] /= array_nb[ i ];
         }
     }
 

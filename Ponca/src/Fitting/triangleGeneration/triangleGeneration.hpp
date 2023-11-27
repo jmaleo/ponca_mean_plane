@@ -234,9 +234,6 @@ TriangleGeneration<DataPoint, _WFunctor, T>::construct_avgHexa(const DataPoint &
         array_nb[i] = 0;
     }
 
-    for ( auto k = 0; k < 6; k++ )
-        std::cout << _targets[ k ][0] << " " << _targets[ k ][1] << " " << _targets[ k ][2] << std::endl;
-
     for (int i = 0 ; i < _attribNeigs.size() ; i++ ){
         VectorType w = _attribNeigs[ i ] - c;
         int best_k = 0;

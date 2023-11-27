@@ -68,11 +68,9 @@ WaveJets<DataPoint, _WFunctor, T>::m_local_jet_pass(const VectorType& localPos){
     
     const auto I     = std::complex<Scalar>(0,1); // complex number 0+i
 
-    // VectorType localNorm =  Base::template worldToLocalFrame<true>(attributes.normal());
-    // Vector2 planeNorm = Vector2 ( *(localNorm.data()+1), *(localNorm.data()+2) );
-    
+    Vector2 planePos = Vector2 ( *(localPos.data()+1), *(localPos.data()+2) );
     // Switch to polar coordinates
-    Scalar r = localPos.norm();
+    Scalar r = planePos.norm();
     Scalar theta = atan2(*(localPos.data()+2), *(localPos.data()+1)); 
     Scalar z = *(localPos.data());
 
@@ -151,21 +149,15 @@ WaveJets<DataPoint, _WFunctor, T>::m_jet_process(){
     //    an(2:end)=abs(an(2:end));
 
 
-    //    const std::complex<Scalar> phi_0_0  = Phicorr(0);
-    //    const std::complex<Scalar> phi_1_m1 = Phicorr(1);
-    //    const std::complex<Scalar> phi_1_p1 = Phicorr(2);
+    // std::complex<Scalar> phi_0_0  = Phicorr(0);
+    // std::complex<Scalar> phi_1_m1 = Phicorr(1);
+    // std::complex<Scalar> phi_1_p1 = Phicorr(2);
     std::complex<Scalar> phi_2_m2 = Phicorr(3);
     std::complex<Scalar> phi_2_0  = Phicorr(4);
     std::complex<Scalar> phi_2_p2 = Phicorr(5);
 
-    // Check with the original code if there is a problem, because we're not supposed to take the first elements of Phicorr
-    // std::complex<Scalar> phi_2_m2 = Phicorr(0);
-    // std::complex<Scalar> phi_2_0  = Phicorr(1);
-    // std::complex<Scalar> phi_2_p2 = Phicorr(2);
-
     // corrected normal !
-    VectorType N = m_P.col(0); 
-
+    VectorType N = m_P.col(0);
 
     m_k1 = Scalar(-2) * Scalar(std::real(phi_2_0 + phi_2_p2 + phi_2_m2));
     m_k2 = Scalar(-2) * Scalar(std::real(phi_2_0 - phi_2_p2 - phi_2_m2));

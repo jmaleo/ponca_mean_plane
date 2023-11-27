@@ -167,8 +167,8 @@ WaveJets<DataPoint, _WFunctor, T>::m_jet_process(){
     VectorType N = m_P.col(0); 
 
 
-    m_k1 = Scalar(2) * Scalar(std::real(phi_2_0 + phi_2_p2 + phi_2_m2));
-    m_k2 = Scalar(2) * Scalar(std::real(phi_2_0 - phi_2_p2 - phi_2_m2));
+    m_k1 = Scalar(-2) * Scalar(std::real(phi_2_0 + phi_2_p2 + phi_2_m2));
+    m_k2 = Scalar(-2) * Scalar(std::real(phi_2_0 - phi_2_p2 - phi_2_m2));
 
     if(m_k2 < m_k1) std::swap(m_k1, m_k2);
 

@@ -18,10 +18,12 @@
 #include "src/Fitting/linePrimitive.h"
 #include "src/Fitting/plane.h"
 #include "src/Fitting/algebraicSphere.h"
-#include "src/Fitting/algebraicEllipsoid.h"
 #include "src/Fitting/localFrame.h"
-#include "src/Fitting/parabolicCylinder.h"
-#include "src/Fitting/algebraicCylinder.h"
+
+#include "src/Fitting/ellipsoid/algebraicEllipsoid.h"
+
+#include "src/Fitting/parabolicCylinder/parabolicCylinder.h"
+#include "src/Fitting/parabolicCylinder/algebraicCylinder.h"
 
 
 // Fitting tools
@@ -36,12 +38,16 @@
 #include "src/Fitting/mongePatch.h"
 #include "src/Fitting/sphereFit.h"
 #include "src/Fitting/orientedSphereFit.h"
-#include "src/Fitting/orientedEllipsoidFit.h"
-#include "src/Fitting/parabolicCylinderFit.h"
-#include "src/Fitting/orientedParabolicCylinderFit.h"
-#include "src/Fitting/algebraicEllipsoid2DFit.h"
-#include "src/Fitting/orientedCylinderFit.h"
+
+#include "src/Fitting/ellipsoid/orientedEllipsoidFit.h"
+#include "src/Fitting/ellipsoid/algebraicEllipsoid2DFit.h"
+
+#include "src/Fitting/parabolicCylinder/parabolicCylinderFit.h"
+#include "src/Fitting/parabolicCylinder/orientedParabolicCylinderFit.h"
+#include "src/Fitting/parabolicCylinder/orientedCylinderFit.h"
+
 #include "src/Fitting/triangleGeneration/triangleGeneration.h"
+
 #include "src/Fitting/waveJets/waveJets.h"
 
 #ifndef __CUDACC__

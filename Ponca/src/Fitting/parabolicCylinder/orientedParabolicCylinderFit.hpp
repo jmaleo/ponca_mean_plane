@@ -222,8 +222,8 @@ OrientedParabolicCylinderFitImpl<DataPoint, _WFunctor, T>::m_uq_parabolic_fittin
     const Eigen::MatrixXd eigenVec = eig.eigenvectors();
     Base::m_uq = eigenVec.col(higher) * eigenVec.col(higher).transpose();
 
-    VectorType v1 = VectorType(0, eigenVec.col(higher)(0), eigenVec.col(higher)(1));
-    VectorType v2 = VectorType(0, eigenVec.col(1 - higher)(0), eigenVec.col(1 - higher)(1));
+    VectorType v1 = VectorType(0, eigenVec.col( 0 )(0), eigenVec.col( 0 )(1));
+    VectorType v2 = VectorType(0, eigenVec.col( 1 )(0), eigenVec.col( 1 )(1));
     Base::m_v1 = Base::template localFrameToWorld<true>(v1);
     Base::m_v2 = Base::template localFrameToWorld<true>(v2);
 

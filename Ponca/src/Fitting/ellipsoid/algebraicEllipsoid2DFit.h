@@ -1,8 +1,12 @@
 #pragma once
 
+
 #include <Eigen/Dense>
 
 #include <Ponca/Fitting>
+#include "../parabolicCylinder/orientedParabolicCylinderFit.h"
+#include "../parabolicCylinder/parabolicCylinderFit.h"
+
 
 
 namespace Ponca
@@ -123,5 +127,5 @@ template < class DataPoint, class _WFunctor, typename T>
                                         Ponca::Plane<DataPoint, _WFunctor,
                                             Ponca::PrimitiveBase<DataPoint,_WFunctor,T>>>>>>>>>;
 
-//! [ParabolicCylinderFit Definition]
+//! [AlgebraicEllipsoid2DFitImpl Definition]
 }

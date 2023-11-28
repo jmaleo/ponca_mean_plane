@@ -32,10 +32,10 @@ public:
 
 // results
 public:
-    Scalar m_uc;       /*!< \brief Constant parameter of the Algebraic hyper-cylinder  */
+    Scalar     m_uc;   /*!< \brief Constant parameter of the Algebraic hyper-cylinder  */
     VectorType m_ul;   /*!< \brief Linear parameter of the Algebraic hyper-cylinder    */
     MatrixType m_uq;   /*!< \brief Quadratic parameter of the Algebraic hyper-cylinder */
-    Scalar m_a; 
+    Scalar     m_a; 
 
     // Curvature info
     Scalar     m_k1;
@@ -47,7 +47,7 @@ public:
     {
         Base::init(_basisCenter);
 
-        m_a = Scalar(0);
+        m_a  = Scalar(1);
         m_uc = Scalar(0);
         m_ul = VectorType::Zero();
         m_uq = MatrixType::Zero();

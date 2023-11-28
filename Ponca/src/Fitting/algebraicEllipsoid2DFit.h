@@ -43,16 +43,23 @@ public:
         }
         else {
             FIT_RESULT res = Base::finalize();
-            Eigen::SelfAdjointEigenSolver<Eigen::Matrix2d> eig(Base::m_uq);
+            Eigen::SelfAdjointEigenSolver<Eigen::Matrix2d> eig(-2.0 * Base::m_uq);
             Eigen::Vector2d values = eig.eigenvalues();
             Eigen::MatrixXd eigenVec = eig.eigenvectors();
-            int higher = (values(0) > values(1))? 1 : 0;
-            Base::m_k1 = values(1 - higher);
-            Base::m_k2 = values(higher);
-            VectorType v1 = VectorType(0, eigenVec.col(1 - higher)(0), eigenVec.col(1 - higher)(1));
-            VectorType v2 = VectorType(0, eigenVec.col(higher)(0), eigenVec.col(higher)(1));
-            Base::m_v1 = Base::template localFrameToWorld<true>(v2);
-            Base::m_v2 = Base::template localFrameToWorld<true>(v1);
+
+            Base::m_k1 = values(0);
+            VectorType v1 = VectorType(0, eigenVec.col(0)(0), eigenVec.col(0)(1));
+            Base::m_k2 = values(1);
+            VectorType v2 = VectorType(0, eigenVec.col(1)(0), eigenVec.col(1)(1));
+
+
+            if (Base::m_k1 > Base::m_k2) {
+                std::swap(Base::m_k1, Base::m_k2);
+                std::swap(Base::m_v1, Base::m_v2);
+            }
+
+            Base::m_v1 = Base::template localFrameToWorld<true>(v1);
+            Base::m_v2 = Base::template localFrameToWorld<true>(v2);
 
             return res;
         }

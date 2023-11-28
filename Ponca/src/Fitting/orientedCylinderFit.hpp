@@ -53,9 +53,9 @@ OrientedCylinderFitImpl<DataPoint, _WFunctor, T>::m_fitting_process () {
     
     m_ellipsoid_fitting();
 
-    m_uq_parabolic_fitting();
-    m_a_parabolic_fitting();
-    m_uc_ul_parabolic_fitting();
+    // m_uq_parabolic_fitting();
+    // m_a_parabolic_fitting();
+    // m_uc_ul_parabolic_fitting();
     
     m_compute_curvature();
 
@@ -88,30 +88,19 @@ OrientedCylinderFitImpl<DataPoint, _WFunctor, T>::m_uq_parabolic_fitting() {
     Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d> eig(Base::m_uq);
     VectorType values = eig.eigenvalues();
 
-    // Sort in a ascending order the 3 eigenvalues
-    int max = 0;
-    int med = 0;
-    int min = 0;
-    for (int i = 0; i < 3; i++) {
-        if (abs(values(i)) > abs(values(max))) {
-            med = max;
-            max = i;
-        }
-        else if (abs(values(i)) > abs(values(med))) {
-            med = i;
-        }
-    }
-    min = 3 - max - med;
-
 
     const Eigen::MatrixXd eigenVec = eig.eigenvectors();
-    const VectorType eigenVec0 = eigenVec.col(max);
-    const VectorType eigenVec1 = eigenVec.col(med);
+    
+    // 1 higher than 0
+    const VectorType eigenVec0 = eigenVec.col(1);
+    // 0 is the littlest
+    const VectorType eigenVec1 = eigenVec.col(0);
     Eigen::Matrix<Scalar, 3, 2> eigenMat;
     eigenMat.col(0) = eigenVec0;
     eigenMat.col(1) = eigenVec1;
     Base::m_v1 = eigenVec0;
     Base::m_v2 = eigenVec1;
+    
     Base::m_uq = eigenMat * eigenMat.transpose();
 
     // // Compute alpha to put away the ambiguity of the solution
@@ -171,45 +160,17 @@ OrientedCylinderFitImpl<DataPoint, _WFunctor, T>::m_compute_curvature() {
     Eigen::SelfAdjointEigenSolver<Eigen::Matrix<Scalar, 3, 3>> eig(H);
     VectorType values = eig.eigenvalues();
 
-    // grab the 2 heighest absolute eigenvalues
-    int min = 0; 
-    bool first_pass = false;
+    // grab the 2 heighest eigenvalues
 
-    for (int i = 0; i < 3; i++) {
-        if (abs(values(i)) < abs(values(min))) {
-            min = i;
-        }
-    }
+    Base::m_k1 = values(0);
+    Base::m_v1 = eig.eigenvectors().col(0);
+    Base::m_k2 = values(1);
+    Base::m_v2 = eig.eigenvectors().col(1);
 
-    for (int i = 0; i < 3; i++) {
-        if (i != min && !first_pass) {
-            Base::m_k1 = values(i);
-            Base::m_v1 = eig.eigenvectors().col(i);
-            first_pass = true;
-        }
-        else if (i != min && first_pass) {
-            Base::m_k2 = values(i);
-            Base::m_v2 = eig.eigenvectors().col(i);
-        }
-    }
 
-    if (Base::m_k1 > Base::m_k2) {
+    if (Base::m_k1 >= Base::m_k2) {
         std::swap(Base::m_k1, Base::m_k2);
         std::swap(Base::m_v1, Base::m_v2);
     }
-
-
-    // if (values(1) >= values(0)) {
-    //     Base::m_k1 = values(0);
-    //     Base::m_k2 = values(1);
-    //     Base::m_v1 = eig.eigenvectors().col(0);
-    //     Base::m_v2 = eig.eigenvectors().col(1);
-    // }
-    // else {
-    //     Base::m_k1 = values(1);
-    //     Base::m_k2 = values(0);
-    //     Base::m_v1 = eig.eigenvectors().col(1);
-    //     Base::m_v2 = eig.eigenvectors().col(0);
-    // }
 
 }

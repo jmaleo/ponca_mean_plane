@@ -1,10 +1,18 @@
 ﻿template < class DataPoint, class _WFunctor, int DiffType, typename T>
+void
+NormalDerivativesCurvatureEstimator<DataPoint, _WFunctor, DiffType, T>::init(const VectorType &_evalPos)
+{
+    Base::init(_evalPos);
+    m_useNormal = false;
+}
+
+template < class DataPoint, class _WFunctor, int DiffType, typename T>
 FIT_RESULT
 NormalDerivativesCurvatureEstimator<DataPoint, _WFunctor, DiffType, T>::finalize()
 {
     if (Base::finalize() == STABLE) {
         if (Base::curvatureEstimatorBase().isValid()) Base::m_eCurrentState = CONFLICT_ERROR_FOUND;
-        Base::m_eCurrentState = computeCurvature(false);
+        Base::m_eCurrentState = computeCurvature(m_useNormal);
     }
 
     return Base::m_eCurrentState;

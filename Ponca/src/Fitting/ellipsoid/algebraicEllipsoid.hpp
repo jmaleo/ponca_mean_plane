@@ -4,8 +4,10 @@ AlgebraicEllipsoid<DataPoint, _WFunctor, T>::potential( const VectorType &_q ) c
 {
     // turn to centered basis
     const VectorType lq = Base::m_w.convertToLocalBasis(_q);
-
-    return m_uc + lq.dot(m_ul) + lq.transpose() * m_uq * lq;
+    Scalar res = m_uc + lq.dot(m_ul) + lq.transpose() * m_uq * lq;
+    // return m_uc + lq.dot(m_ul) + lq.transpose() * m_uq * lq;
+    // return res / primitiveGradient(Base::m_w.evalPos()).norm();
+    return res;
 }
 
 template < class DataPoint, class _WFunctor, typename T>

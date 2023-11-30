@@ -1,6 +1,8 @@
 #pragma once
 
 #include "./algebraicEllipsoid.h"
+#include "../curvature.h"
+#include "../curvatureEstimation.h"
 #include <Ponca/Fitting>
 
 namespace Ponca
@@ -91,11 +93,19 @@ public:
     inline MatrixArray dShapeOperator3D() const;
 };
 
+// template < class DataPoint, class _WFunctor, int DiffType, typename T>
+// using OrientedEllipsoidDer =
+//     OrientedEllipsoidDerImpl<DataPoint, _WFunctor, DiffType,
+//         MeanPositionDer<DataPoint, _WFunctor, DiffType,
+//             MeanNormalDer<DataPoint, _WFunctor, DiffType, T>>>;
+
 template < class DataPoint, class _WFunctor, int DiffType, typename T>
-using OrientedEllipsoidDer =
+using OrientedEllipsoidDer = 
     OrientedEllipsoidDerImpl<DataPoint, _WFunctor, DiffType,
         MeanPositionDer<DataPoint, _WFunctor, DiffType,
-            MeanNormalDer<DataPoint, _WFunctor, DiffType, T>>>;
+            MeanNormalDer<DataPoint, _WFunctor, DiffType,
+                NormalDerivativesCurvatureEstimator<DataPoint, _WFunctor, DiffType, 
+                    CurvatureEstimatorBase<DataPoint, _WFunctor, DiffType,T>>>>>;
 
 #include "./orientedEllipsoidFit.hpp"
 

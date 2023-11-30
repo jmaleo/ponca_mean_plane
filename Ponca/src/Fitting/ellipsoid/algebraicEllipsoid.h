@@ -62,12 +62,17 @@ public:
     /*! \brief Approximation of the scalar field gradient at the evaluation point */
     PONCA_MULTIARCH inline VectorType primitiveGradient () const { return m_ul; }
 
-    PONCA_MULTIARCH inline Scalar curvature_k (const VectorType& _q) const{
-        MatrixType secGrad = 2 * (m_uq);
-        return secGrad.norm();
-    }
+    MatrixType dNormal() const { return 2 * m_uq / m_ul.norm();}
 
-    MatrixType dNormal() const {return 2 * m_uq / m_ul.norm();}
+    // MatrixType dNormal() const {
+    //     std::cout << "dNormal normalized by primitiveGradient(project(Base::m_w.evalPos())).norm()" << std::endl;
+    //     return 2 * m_uq / primitiveGradient(project(Base::m_w.evalPos())).norm();
+    // }
+
+    // MatrixType dNormal() const {
+    //     std::cout << "dNormal normalized by primitiveGradient(Base::m_w.evalPos()).norm()" << std::endl;
+    //     return 2 * m_uq / primitiveGradient(Base::m_w.evalPos()).norm();
+    // }
 
     // f(x) = uc + ul^T x + x^T Uq x
     //      = uc + ul^T x + x^T P D P^T x

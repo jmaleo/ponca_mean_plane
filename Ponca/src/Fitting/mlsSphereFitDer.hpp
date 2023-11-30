@@ -65,6 +65,8 @@ template < class DataPoint, class _WFunctor, int DiffType, typename T>
 FIT_RESULT
 MlsSphereFitDer<DataPoint, _WFunctor, DiffType, T>::finalize()
 {
+    
+    Base::setUseNormal(true);
     Base::finalize();
 
     if (this->isReady())

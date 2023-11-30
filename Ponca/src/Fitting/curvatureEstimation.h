@@ -37,6 +37,11 @@ namespace Ponca
     public:
         PONCA_EXPLICIT_CAST_OPERATORS_DER(NormalDerivativesCurvatureEstimator,normalDerivativesCurvatureEstimator)
         PONCA_FITTING_DECLARE_FINALIZE
+        PONCA_FITTING_DECLARE_INIT
+
+        bool m_useNormal = false; /*!< \brief Use normal vector to compute tangent plane basis */
+
+        PONCA_MULTIARCH inline void setUseNormal(bool _useNormal) { m_useNormal = _useNormal; }
 
     private:
         //! \brief Compute principal curvature directions relatively to the tangent plane

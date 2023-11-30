@@ -226,7 +226,7 @@ FIT_RESULT
 OrientedEllipsoidDerImpl<DataPoint, _WFunctor, DiffType, T>::finalize()
 {
     PONCA_MULTIARCH_STD_MATH(sqrt);
-
+    Base::setUseNormal(true);
     Base::finalize();
     // Test if base finalize end on a viable case (stable / unstable)
     const Scalar sumW = Base::getWeightSum();

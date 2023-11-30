@@ -106,10 +106,10 @@ public:
 
 }; //class MlsSphereFitDer
 
-template < class DataPoint, class _WFunctor, int DiffType, typename T>
-using MlsSphereFitDerTest = MlsSphereFitDer<DataPoint, _WFunctor, DiffType, 
-        NormalDerivativesCurvatureEstimator<DataPoint, _WFunctor, DiffType, 
-            CurvatureEstimatorBase<DataPoint, _WFunctor, DiffType,T>>>;
+// template < class DataPoint, class _WFunctor, int DiffType, typename T>
+// using MlsSphereFitDerTest = MlsSphereFitDer<DataPoint, _WFunctor, DiffType, 
+//             CurvatureEstimatorBase<DataPoint, _WFunctor, DiffType,
+//         NormalDerivativesCurvatureEstimator<DataPoint, _WFunctor, DiffType, T >>>; 
 
 #include "mlsSphereFitDer.hpp"
 

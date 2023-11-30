@@ -3,7 +3,8 @@ void
 NormalDerivativesCurvatureEstimator<DataPoint, _WFunctor, DiffType, T>::init(const VectorType &_evalPos)
 {
     Base::init(_evalPos);
-    m_useNormal = false;
+
+    m_useNormal = true;
 }
 
 template < class DataPoint, class _WFunctor, int DiffType, typename T>

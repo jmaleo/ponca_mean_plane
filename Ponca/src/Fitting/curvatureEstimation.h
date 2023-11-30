@@ -39,7 +39,7 @@ namespace Ponca
         PONCA_FITTING_DECLARE_FINALIZE
         PONCA_FITTING_DECLARE_INIT
 
-        bool m_useNormal = false; /*!< \brief Use normal vector to compute tangent plane basis */
+        bool m_useNormal = true; /*!< \brief Use normal vector to compute tangent plane basis */
 
         PONCA_MULTIARCH inline void setUseNormal(bool _useNormal) { m_useNormal = _useNormal; }
 

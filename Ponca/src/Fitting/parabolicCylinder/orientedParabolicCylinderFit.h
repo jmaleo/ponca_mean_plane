@@ -24,7 +24,6 @@ protected:
                 Base::PROVIDES_MEAN_NORMAL &&  
                 Base::PROVIDES_LOCAL_FRAME && 
                 Base::PROVIDES_PARABOLIC_CYLINDER //, /*!< \brief Requires PrimitiveBase and plane*/
-        // PROVIDES_ALGEBRAIC_PARABOLIC_CYLINDER        /*!< \brief Provides Algebraic Parabolic Cylinder */
     };
 
 public:
@@ -76,6 +75,7 @@ template < class DataPoint, class _WFunctor, typename T>
                                 Ponca::LocalFrame<DataPoint, _WFunctor,
                                     Ponca::Plane<DataPoint, _WFunctor,
                                         Ponca::PrimitiveBase<DataPoint,_WFunctor,T>>>>>>>>;
+
 // Near oriented PC-MLS   COV + oriented
 template < class DataPoint, class _WFunctor, typename T>
     using NearOrientedParabolicCylinderFit =

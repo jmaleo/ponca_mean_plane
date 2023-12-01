@@ -12,7 +12,7 @@ namespace Ponca
     \see 
 */
 template < class DataPoint, class _WFunctor, typename T >
-class OrientedCylinderFitImpl: public T
+class OrientedHyperboloidFitImpl: public T
 {
     PONCA_FITTING_DECLARE_DEFAULT_TYPES
     PONCA_FITTING_DECLARE_MATRIX_TYPE
@@ -22,7 +22,7 @@ protected:
     {
         Check = Base::PROVIDES_PRIMITIVE_BASE &&
                 Base::PROVIDES_MEAN_NORMAL &&
-                Base::PROVIDES_ALGEBRAIC_CYLINDER //, /*!< \brief Requires PrimitiveBase and plane*/
+                Base::PROVIDES_HYPERBOLOID //, /*!< \brief Requires PrimitiveBase and plane*/
     };
 // results
 protected:
@@ -36,7 +36,7 @@ protected:
 
 public:
     
-    PONCA_EXPLICIT_CAST_OPERATORS(OrientedCylinderFitImpl,orientedCylinderFitImpl)
+    PONCA_EXPLICIT_CAST_OPERATORS(OrientedHyperboloidFitImpl,orientedHyperboloidFitImpl)
     PONCA_FITTING_DECLARE_INIT_ADD_FINALIZE
 
 private:
@@ -51,18 +51,18 @@ private:
     PONCA_MULTIARCH inline void    m_compute_curvature       ();
 
 
-}; //class OrientedCylinderFitImpl
+}; //class OrientedHyperboloidFitImpl
 
-/// \brief Helper alias for ParabolicCylinder fitting on points
-//! [OrientedCylinderFit Definition]
+/// \brief Helper alias for Hyperboloid fitting on points
+//! [OrientedHyperboloidFit Definition]
 template < class DataPoint, class _WFunctor, typename T>
-    using OrientedCylinderFit =
-        Ponca::OrientedCylinderFitImpl<DataPoint, _WFunctor,
+    using OrientedHyperboloid_ACP_Fit =
+        Ponca::OrientedHyperboloidFitImpl<DataPoint, _WFunctor,
             Ponca::MeanNormal<DataPoint, _WFunctor,
                 Ponca::MeanPosition<DataPoint, _WFunctor,
-                    Ponca::AlgebraicCylinder<DataPoint, _WFunctor,T>>>>;
+                    Ponca::Hyperboloid<DataPoint, _WFunctor,T>>>>;
 
-//! [ParabolicCylinderFit Definition]
+//! [ParabolicHyperboloidFit Definition]
 
-#include "orientedCylinderFit.hpp"
+#include "orientedHyperboloidFit.hpp"
 }

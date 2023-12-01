@@ -23,7 +23,8 @@
 #include "src/Fitting/ellipsoid/algebraicEllipsoid.h"
 
 #include "src/Fitting/parabolicCylinder/parabolicCylinder.h"
-#include "src/Fitting/parabolicCylinder/algebraicCylinder.h"
+
+#include "src/Fitting/ellipsoid/hyperboloid.h"
 
 
 // Fitting tools
@@ -44,7 +45,8 @@
 
 #include "src/Fitting/parabolicCylinder/parabolicCylinderFit.h"
 #include "src/Fitting/parabolicCylinder/orientedParabolicCylinderFit.h"
-#include "src/Fitting/parabolicCylinder/orientedCylinderFit.h"
+
+#include "src/Fitting/ellipsoid/orientedHyperboloidFit.h"
 
 #include "src/Fitting/triangleGeneration/triangleGeneration.h"
 

@@ -25,8 +25,9 @@ protected:
     enum
     {
         check = Base::PROVIDES_PRIMITIVE_BASE 
-        && Base::PROVIDES_PLANE,                                        /*!< \brief Requires PrimitiveBase */
-        PROVIDES_PARABOLIC_CYLINDER,                                    /*!< \brief Provides Algebraic Ellipsoid */
+        && Base::PROVIDES_PLANE,                                        /*!< \brief Requires PrimitiveBase      */
+        PROVIDES_PARABOLIC_CYLINDER,                                    /*!< \brief Provides Parabolic cylinder */
+        PROVIDES_NORMAL_DERIVATIVE,                                     /*!< \brief Provides Normal Derivative  */
     };
 
 public:
@@ -110,13 +111,8 @@ public:
         return primitiveGradient(Base::m_w.basisCenter());
     }
 
-    PONCA_MULTIARCH inline Scalar curvature_k (const VectorType& _q) const{
-        // Matrix2 dGrad = dPrimitiveGradient();
-        // return dGrad.norm();
-        return std::abs(kMean());
-    }
-
-    PONCA_MULTIARCH inline Matrix2 dPrimitiveGradient () const;
+    // The result seems to be the same as ACP on the Hessian when using dNormal() with curvatureEstimation.h
+    PONCA_MULTIARCH inline MatrixType dNormal() const;
 
     PONCA_MULTIARCH inline Scalar alpha_curvature () const { return m_a; }
 

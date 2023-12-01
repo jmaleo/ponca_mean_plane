@@ -1,6 +1,6 @@
 template < class DataPoint, class _WFunctor, typename T>
-typename AlgebraicCylinder<DataPoint, _WFunctor, T>::Scalar
-AlgebraicCylinder<DataPoint, _WFunctor, T>::potential( const VectorType &_q ) const
+typename Hyperboloid<DataPoint, _WFunctor, T>::Scalar
+Hyperboloid<DataPoint, _WFunctor, T>::potential( const VectorType &_q ) const
 {
     // turn to centered basis
     const VectorType lq = Base::m_w.convertToLocalBasis(_q);
@@ -9,8 +9,8 @@ AlgebraicCylinder<DataPoint, _WFunctor, T>::potential( const VectorType &_q ) co
 }
 
 template < class DataPoint, class _WFunctor, typename T>
-typename AlgebraicCylinder<DataPoint, _WFunctor, T>::VectorType
-AlgebraicCylinder<DataPoint, _WFunctor, T>::project( const VectorType& _q ) const
+typename Hyperboloid<DataPoint, _WFunctor, T>::VectorType
+Hyperboloid<DataPoint, _WFunctor, T>::project( const VectorType& _q ) const
 {
     PONCA_MULTIARCH_STD_MATH(abs);
 
@@ -54,8 +54,8 @@ AlgebraicCylinder<DataPoint, _WFunctor, T>::project( const VectorType& _q ) cons
 
 
 template < class DataPoint, class _WFunctor, typename T>
-typename AlgebraicCylinder<DataPoint, _WFunctor, T>::VectorType
-AlgebraicCylinder<DataPoint, _WFunctor, T>::primitiveGradient( const VectorType &_q ) const
+typename Hyperboloid<DataPoint, _WFunctor, T>::VectorType
+Hyperboloid<DataPoint, _WFunctor, T>::primitiveGradient( const VectorType &_q ) const
 {
         // turn to centered basis
         const VectorType lq = Base::m_w.convertToLocalBasis(_q);

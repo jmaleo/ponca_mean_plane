@@ -2,7 +2,7 @@
 
 template < class DataPoint, class _WFunctor, typename T>
 void
-OrientedCylinderFitImpl<DataPoint, _WFunctor, T>::init(const VectorType& _evalPos)
+OrientedHyperboloidFitImpl<DataPoint, _WFunctor, T>::init(const VectorType& _evalPos)
 {
     Base::init(_evalPos);
 
@@ -16,7 +16,7 @@ OrientedCylinderFitImpl<DataPoint, _WFunctor, T>::init(const VectorType& _evalPo
 
 template < class DataPoint, class _WFunctor, typename T>
 bool
-OrientedCylinderFitImpl<DataPoint, _WFunctor, T>::addLocalNeighbor(Scalar w,
+OrientedHyperboloidFitImpl<DataPoint, _WFunctor, T>::addLocalNeighbor(Scalar w,
                                                       const VectorType &localQ,
                                                       const DataPoint &attributes)
 {
@@ -34,7 +34,7 @@ OrientedCylinderFitImpl<DataPoint, _WFunctor, T>::addLocalNeighbor(Scalar w,
 
 template < class DataPoint, class _WFunctor, typename T>
 FIT_RESULT
-OrientedCylinderFitImpl<DataPoint, _WFunctor, T>::finalize () {
+OrientedHyperboloidFitImpl<DataPoint, _WFunctor, T>::finalize () {
         // handle specific configurations
     // With less than 3 neighbors the fitting is undefined
     if(Base::finalize() != STABLE || Base::getNumNeighbors() < 3)
@@ -49,7 +49,7 @@ OrientedCylinderFitImpl<DataPoint, _WFunctor, T>::finalize () {
 
 template < class DataPoint, class _WFunctor, typename T>
 void
-OrientedCylinderFitImpl<DataPoint, _WFunctor, T>::m_fitting_process () {
+OrientedHyperboloidFitImpl<DataPoint, _WFunctor, T>::m_fitting_process () {
     
     m_ellipsoid_fitting();
 
@@ -63,7 +63,7 @@ OrientedCylinderFitImpl<DataPoint, _WFunctor, T>::m_fitting_process () {
 
 template < class DataPoint, class _WFunctor, typename T>
 void
-OrientedCylinderFitImpl<DataPoint, _WFunctor, T>::m_ellipsoid_fitting () {
+OrientedHyperboloidFitImpl<DataPoint, _WFunctor, T>::m_ellipsoid_fitting () {
     const Scalar sumW = Base::getWeightSum();
     const Scalar invSumW = Scalar(1.)/sumW;
 
@@ -81,7 +81,7 @@ OrientedCylinderFitImpl<DataPoint, _WFunctor, T>::m_ellipsoid_fitting () {
 
 template < class DataPoint, class _WFunctor, typename T>
 void
-OrientedCylinderFitImpl<DataPoint, _WFunctor, T>::m_uq_parabolic_fitting() {
+OrientedHyperboloidFitImpl<DataPoint, _WFunctor, T>::m_uq_parabolic_fitting() {
     PONCA_MULTIARCH_STD_MATH(abs);
     constexpr Scalar epsilon = Eigen::NumTraits<Scalar>::dummy_precision();
 
@@ -117,7 +117,7 @@ OrientedCylinderFitImpl<DataPoint, _WFunctor, T>::m_uq_parabolic_fitting() {
 
 template < class DataPoint, class _WFunctor, typename T>
 void
-OrientedCylinderFitImpl<DataPoint, _WFunctor, T>::m_a_parabolic_fitting () {
+OrientedHyperboloidFitImpl<DataPoint, _WFunctor, T>::m_a_parabolic_fitting () {
     
     const Scalar weight = Base::getWeightSum();
     const Scalar invSumW = Scalar(1.)/weight;
@@ -138,7 +138,7 @@ OrientedCylinderFitImpl<DataPoint, _WFunctor, T>::m_a_parabolic_fitting () {
 
 template < class DataPoint, class _WFunctor, typename T>
 void
-OrientedCylinderFitImpl<DataPoint, _WFunctor, T>::m_uc_ul_parabolic_fitting () {
+OrientedHyperboloidFitImpl<DataPoint, _WFunctor, T>::m_uc_ul_parabolic_fitting () {
     const Scalar weight = Base::getWeightSum();
     const Scalar invSumW = Scalar(1.)/weight;
     // Matrix2 Q = Base::m_uq * Base::m_uq.transpose();
@@ -153,7 +153,7 @@ OrientedCylinderFitImpl<DataPoint, _WFunctor, T>::m_uc_ul_parabolic_fitting () {
 
 template < class DataPoint, class _WFunctor, typename T>
 void
-OrientedCylinderFitImpl<DataPoint, _WFunctor, T>::m_compute_curvature() {
+OrientedHyperboloidFitImpl<DataPoint, _WFunctor, T>::m_compute_curvature() {
     
     Scalar curv = Scalar(2) * Base::m_a;
     MatrixType H = Base::m_uq * curv;

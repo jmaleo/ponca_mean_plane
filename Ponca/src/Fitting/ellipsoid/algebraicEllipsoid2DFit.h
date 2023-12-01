@@ -47,7 +47,8 @@ public:
         }
         else {
             FIT_RESULT res = Base::finalize();
-            Eigen::SelfAdjointEigenSolver<Eigen::Matrix2d> eig(-2.0 * Base::m_uq);
+
+            Eigen::SelfAdjointEigenSolver<Eigen::Matrix2d> eig(2.0 * Base::m_a * Base::m_uq);
             Eigen::Vector2d values = eig.eigenvalues();
             Eigen::MatrixXd eigenVec = eig.eigenvectors();
 

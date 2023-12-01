@@ -10,12 +10,12 @@ namespace Ponca
     \brief Algebraic Cylinder primitive
 
     This primitive provides:
-    \verbatim PROVIDES_ALGEBRAIC_ELLIPSOID \endverbatim
+    \verbatim PROVIDES_HYPERBOLOID \endverbatim
 
     \see AlgebraicSphere
 */
 template < class DataPoint, class _WFunctor, typename T >
-class AlgebraicCylinder : public T
+class Hyperboloid : public T
 {
     PONCA_FITTING_DECLARE_DEFAULT_TYPES
     PONCA_FITTING_DECLARE_MATRIX_TYPE
@@ -24,11 +24,12 @@ protected:
     enum
     {
         check = Base::PROVIDES_PRIMITIVE_BASE,  /*!< \brief Requires PrimitiveBase */
-        PROVIDES_ALGEBRAIC_CYLINDER,           /*!< \brief Provides Algebraic Cylinder */
+        PROVIDES_HYPERBOLOID,           /*!< \brief Provides Algebraic Cylinder */
+        PROVIDES_NORMAL_DERIVATIVE             /*!< \brief Provides Normal Derivative */
     };
 
 public:
-    PONCA_EXPLICIT_CAST_OPERATORS(AlgebraicCylinder, algebraicCylinder)
+    PONCA_EXPLICIT_CAST_OPERATORS(Hyperboloid, hyperboloid)
 
 // results
 public:
@@ -104,7 +105,7 @@ public:
     PONCA_MULTIARCH inline VectorType kmaxDirection() const { return m_v2; }
 
 
-}; //class AlgebraicCylinder
+}; //class Hyperboloid
 
-#include "algebraicCylinder.hpp"
+#include "hyperboloid.hpp"
 }

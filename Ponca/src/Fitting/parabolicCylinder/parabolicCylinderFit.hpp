@@ -123,8 +123,8 @@ ParabolicCylinderFitImpl<DataPoint, _WFunctor, T>::m_uq_parabolic_fitting () {
 
     Base::m_uq = eigenVec.col(higher) * eigenVec.col(higher).transpose();
 
-    VectorType v1 = VectorType(0, eigenVec.col(higher)(0), eigenVec.col(higher)(1));
-    VectorType v2 = VectorType(0, eigenVec.col(1 - higher)(0), eigenVec.col(1 - higher)(1));
+    VectorType v1 = VectorType(0, eigenVec.col(0)(0), eigenVec.col(0)(1));
+    VectorType v2 = VectorType(0, eigenVec.col(1)(0), eigenVec.col(1)(1));
     Base::m_v1 = Base::template localFrameToWorld<true>(v1);
     Base::m_v2 = Base::template localFrameToWorld<true>(v2);
 
@@ -160,7 +160,7 @@ ParabolicCylinderFitImpl<DataPoint, _WFunctor, T>::m_a_parabolic_fitting () {
     F(3) = u0_squared * m_F_cov(3) + 2 * Base::m_uq(0, 1) * m_F_cov(5) + u1_squared * m_F_cov(4);
 
     Eigen::Matrix<Scalar, 4, 1> x = (A).bdcSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).solve(F);
-    Base::m_a *= x(3,0);
+    Base::m_a *= - x(3,0);
 
 }
 
@@ -192,7 +192,8 @@ ParabolicCylinderFitImpl<DataPoint, _WFunctor, T>::m_uc_ul_parabolic_fitting () 
 template < class DataPoint, class _WFunctor, typename T>
 void
 ParabolicCylinderFitImpl<DataPoint, _WFunctor, T>::m_compute_curvature() {
-    Scalar curv = - Scalar(2) * Base::m_a;
+    Scalar curv =  Scalar(2) * Base::m_a;
+
     if (curv <= 0) {
         Base::m_k1 = curv;
         Base::m_k2 = Scalar(0);

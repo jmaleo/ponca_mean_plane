@@ -75,11 +75,13 @@ ParabolicCylinder<DataPoint, _WFunctor, T>::primitiveGradient( const VectorType&
     VectorType proj = Base::worldToLocalFrame(_q);
     Vector2 temp {proj(1),  proj(2)};
     Vector2 df = m_ul + 2 * m_a * m_uq * temp;
-    VectorType local_gradient { 1, -df(0) , -df(1) };
+    VectorType local_gradient { 1, df(0) , df(1) };
 
     VectorType world_gradient = Base::template localFrameToWorld<true>(local_gradient);
 
-    return m_correctOrientation * world_gradient;
+    int orien = Base::primitiveGradient().dot(world_gradient) > 0 ? 1 : -1;
+
+    return orien * world_gradient;
 }
 
 

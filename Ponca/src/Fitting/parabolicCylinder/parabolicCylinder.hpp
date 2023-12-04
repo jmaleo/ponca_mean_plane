@@ -14,56 +14,8 @@ ParabolicCylinder<DataPoint, _WFunctor, T>::project( const VectorType& _q ) cons
     PONCA_MULTIARCH_STD_MATH(abs);
     constexpr Scalar epsilon = Eigen::NumTraits<Scalar>::dummy_precision();
     
-    const VectorType grad = primitiveGradient(_q);
-
-    VectorType u = Base::getFrameU();
-    VectorType v = Base::getFrameV();
-
-    MatrixType B;
-    B << grad, u, v;
-
-    MatrixType _uq = MatrixType::Zero();
-    _uq.block(1,1,2,2) = m_uq;
-    _uq(0,0) = 1;
-
-    MatrixType uq = B * _uq * B.transpose();
-
-    const Scalar a = grad.transpose() * uq * grad;
-    const Scalar b = grad.squaredNorm();
-    const Scalar c = potential(_q);
-
-    // solve a t^2 + b t + c = 0
-    Scalar t = 0;
-
-    if(abs(a) < epsilon)
-    {
-        if(abs(b) < epsilon)
-        {
-            t = 0;
-        }
-        else
-        {
-            t = - c / b;
-        }
-    }
-    else
-    {
-        const Scalar delta = b*b - 4*a*c;
-
-        if(delta >= 0)
-        {
-            t = (- b + sqrt(delta)) / (2 * a);
-        }
-        else
-        {
-            t = 0; // no solution so no projection
-        }
-    }
-
-    return Base::project(_q) + t * grad;
-    
-    // VectorType x = Base::worldToLocalFrame(_q);
-    // return Base::project(_q) + ( eval_quadratic_function(*(x.data()+1), *(x.data()+2)) * Base::primitiveGradient(_q));
+    VectorType x = Base::worldToLocalFrame(_q);
+    return Base::project(_q) + ( eval_quadratic_function(*(x.data()+1), *(x.data()+2)) * Base::primitiveGradient(_q));
 }
 
 template < class DataPoint, class _WFunctor, typename T>
@@ -75,13 +27,11 @@ ParabolicCylinder<DataPoint, _WFunctor, T>::primitiveGradient( const VectorType&
     VectorType proj = Base::worldToLocalFrame(_q);
     Vector2 temp {proj(1),  proj(2)};
     Vector2 df = m_ul + 2 * m_a * m_uq * temp;
-    VectorType local_gradient { 1, df(0) , df(1) };
+    VectorType local_gradient { 1, -df(0) , -df(1) };
 
     VectorType world_gradient = Base::template localFrameToWorld<true>(local_gradient);
 
-    int orien = Base::primitiveGradient().dot(world_gradient) > 0 ? 1 : -1;
-
-    return orien * world_gradient;
+    return m_correctOrientation * world_gradient;
 }
 
 
@@ -97,13 +47,13 @@ ParabolicCylinder<DataPoint, _WFunctor, T>::dNormal() const
     MatrixType B;
     B << n, u, v;
 
-    Matrix2 dN_2D = (2 * m_a * m_uq);
+    Matrix2 dN_2D = (2 * -m_a * -m_uq);
     MatrixType dN = MatrixType::Zero();
     dN.block(1,1,2,2) = dN_2D;
     // put 1 on the first row and column
     dN(0,0) = 1; 
 
-    VectorType ul {1, m_ul(0), m_ul(1)};
+    VectorType ul {1, -m_ul(0), -m_ul(1)};
     
     return ( B * dN * B.transpose() ) / Base::template localFrameToWorld<true>(ul).norm(); 
 

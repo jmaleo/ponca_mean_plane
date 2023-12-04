@@ -94,6 +94,15 @@ public:
     //! \brief Make the primitive fitting to be a demi-ellipsoid instead of a parabolic cylinder
     PONCA_MULTIARCH inline void setCylinder(bool b) { m_isCylinder = b; }
 
+    PONCA_MULTIARCH inline void correct_orientation() {
+        if (Base::primitiveGradient().dot(primitiveGradient()) < Scalar(0)) {
+            m_correctOrientation = Scalar(-1);
+        }
+        else {
+            m_correctOrientation = Scalar(1);
+        }
+    }
+
     //! \brief Value of the scalar field at the location \f$ \mathbf{q} \f$
     PONCA_MULTIARCH inline Scalar potential (const VectorType& _q) const;
 
@@ -108,7 +117,8 @@ public:
 
     /*! \brief Approximation of the scalar field gradient at the evaluation point */
     PONCA_MULTIARCH inline VectorType primitiveGradient () const {
-        return primitiveGradient(Base::m_w.basisCenter());
+        VectorType n = primitiveGradient(Base::m_w.basisCenter());
+        return n / n.norm();
     }
 
     // The result seems to be the same as ACP on the Hessian when using dNormal() with curvatureEstimation.h

@@ -22,7 +22,8 @@ protected:
     {
         Check = Base::PROVIDES_PRIMITIVE_BASE &&
                 Base::PROVIDES_MEAN_NORMAL &&
-                Base::PROVIDES_HYPERBOLOID //, /*!< \brief Requires PrimitiveBase and plane*/
+                // Base::PROVIDES_HYPERBOLOID //, /*!< \brief Requires Hyperboloid */
+                Base::PROVIDES_ALGEBRAIC_ELLIPSOID /*!< \brief Requires Algebraic Ellipsoid */
     };
 // results
 protected:

@@ -180,7 +180,6 @@ OrientedParabolicCylinderFitImpl<DataPoint, _WFunctor, T>::m_fitting_process () 
         m_uc_ul_parabolic_fitting();
         m_compute_curvature();
     }
-
 }
 
 template < class DataPoint, class _WFunctor, typename T>
@@ -195,7 +194,7 @@ OrientedParabolicCylinderFitImpl<DataPoint, _WFunctor, T>::m_ellipsoid_fitting (
 
     Base::m_uq = Internal::solve_symmetric_sylvester(A, C);
     Base::m_ul = invSumW * (m_sumN2D - Scalar(2) * Base::m_uq * m_sumP2D);
-    Base::m_uc = - invSumW * ( Base::m_ul.dot(m_sumP2D) + (m_prodPP2D * Base::m_uq).trace() + m_sumH);
+    Base::m_uc = - invSumW * ( Base::m_ul.transpose() * m_sumP2D + (m_prodPP2D * Base::m_uq).trace() - m_sumH);
 
     Base::m_a = Scalar(1);
 }
@@ -238,18 +237,17 @@ OrientedParabolicCylinderFitImpl<DataPoint, _WFunctor, T>::m_a_parabolic_fitting
     const Scalar weight = Base::getWeightSum();
     const Scalar invSumW = Scalar(1.)/weight;
 
-    // Matrix2 Q = Base::m_uq * Base::m_uq.transpose();                       // 2x2
-    Matrix2 Q_squared = Base::m_uq * Base::m_uq;                           // 2x2
-    Scalar A = (m_prodPP2D.array() * Q_squared.array()).sum(); // 1
-    Vector2 B = Base::m_uq * m_sumP2D;                                  // 2x2 * 2x1 = 2x1
-    Scalar C = (m_prodPN2D.array() * Base::m_uq.array()).sum();         // 1
+    Matrix2 Q_squared = Base::m_uq * Base::m_uq; // 2x2
+    
+    Scalar num = (m_prodPP2D * Base::m_uq).trace();                    // 2x2 * 2x2 = 2x2 -> trace = 1
+    Scalar denom = (m_prodPP2D * Q_squared).trace();                   // 2x2 * 2x2 = 2x2 -> trace = 1
 
-    Scalar first = invSumW * m_sumN2D.transpose() * B;         // 1 * 1x2 * 2x1 = 1
-    Scalar second = invSumW * B.transpose() * B;               // 1 * 1x2 * 2x1 = 1
+    Scalar weight_num = (1 - invSumW);
+    Scalar weight_denom = 2 * weight_num;
 
-    Scalar a = (C - first) / (4*A - second);                 // (1 - 1) / (1 * 1 - 1)
+    Scalar a = weight_num * num / (weight_denom * denom);
+
     Base::m_a *= a;
-
 }
 
 template < class DataPoint, class _WFunctor, typename T>
@@ -257,20 +255,19 @@ void
 OrientedParabolicCylinderFitImpl<DataPoint, _WFunctor, T>::m_uc_ul_parabolic_fitting () {
     const Scalar weight = Base::getWeightSum();
     const Scalar invSumW = Scalar(1.)/weight;
-    // Matrix2 Q = Base::m_uq * Base::m_uq.transpose();
-    Vector2 B = Base::m_uq * m_sumP2D;
-    Base::m_ul = invSumW * ( m_sumN2D - Base::m_a * B);
+
+    Base::m_ul = invSumW * ( m_sumN2D - 2 * Base::m_a * Base::m_uq * m_sumP2D );
 
 
     Scalar A = Base::m_ul.transpose() * m_sumP2D;
-    Scalar C = (m_prodPN2D.array() * Base::m_uq.array()).sum();
-    Base::m_uc = - invSumW * (A + Base::m_a * C + m_sumH);
+    Scalar B = Base::m_a * (m_prodPP2D * Base::m_uq).trace();
+    Base::m_uc = - invSumW * (A + B - m_sumH);
 }
 
 template < class DataPoint, class _WFunctor, typename T>
 void
 OrientedParabolicCylinderFitImpl<DataPoint, _WFunctor, T>::m_compute_curvature() {
-    Scalar curv = Scalar(2) * Base::m_a * Base::m_a;
+    Scalar curv = - Scalar(2) * Base::m_a;
 
     if (curv <= 0) {
         Base::m_k1 = curv;

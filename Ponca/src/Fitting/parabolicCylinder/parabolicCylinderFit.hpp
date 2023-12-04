@@ -6,9 +6,6 @@ ParabolicCylinderFitImpl<DataPoint, _WFunctor, T>::init(const VectorType& _evalP
 {
     Base::init(_evalPos);
 
-
-    m_A_cov = SampleMatrix (7, 7);
-    m_F_cov = SampleVector (7);
     m_A_cov.setZero();
     m_F_cov.setZero();
 
@@ -39,10 +36,10 @@ ParabolicCylinderFitImpl<DataPoint, _WFunctor, T>::addLocalNeighbor(Scalar w,
         Scalar xx = x*x;
         Scalar yy = y*y;
         
-        Eigen::Vector<Scalar, 7> v {1, x, y , xx, yy, xy, xy};
+        Eigen::Vector<Scalar, 7> v {1, x, y , xx, xy, xy, yy};
 
-        m_A_cov += v * v.transpose() * w;
-        m_F_cov += f * w * v;
+        m_A_cov += w * v * v.transpose();
+        m_F_cov += w * v * f;
 
         return true;
     }
@@ -95,9 +92,9 @@ ParabolicCylinderFitImpl<DataPoint, _WFunctor, T>::m_ellipsoid_fitting () {
     Base::m_ul(0)   = x(1,0);  
     Base::m_ul(1)   = x(2,0);  
     Base::m_uq(0,0) = x(3,0);
-    Base::m_uq(1,1) = x(4,0);
-    Base::m_uq(0,1) = x(5,0);
-    Base::m_uq(1,0) = x(6,0);
+    Base::m_uq(0,1) = x(4,0);
+    Base::m_uq(1,0) = x(5,0);
+    Base::m_uq(1,1) = x(6,0);
 }
 
 template < class DataPoint, class _WFunctor, typename T>
@@ -135,59 +132,32 @@ void
 ParabolicCylinderFitImpl<DataPoint, _WFunctor, T>::m_a_parabolic_fitting () {
 
     constexpr Scalar epsilon = Eigen::NumTraits<Scalar>::dummy_precision();
+
+    Eigen::Matrix<Scalar, 4, 1> uq (Base::m_uq(0,0), Base::m_uq(1,0), Base::m_uq(0,1), Base::m_uq(1,1));
+    Eigen::Matrix<Scalar, 3, 1> uc_ul (Base::m_uc, Base::m_ul(0), Base::m_ul(1));
+
+    Eigen::Matrix<Scalar, 7, 1> A = m_A_cov.block(0, 3, 7, 4) * uq;
+
+    Eigen::Matrix<Scalar, 7, 1> F = m_F_cov - m_A_cov.block(0, 0, 7, 3) * uc_ul;
     
-    Scalar u0_squared = Base::m_uq(0, 0);
-    Scalar u1_squared = Base::m_uq(1, 1);
-
-    Eigen::MatrixXd A = Eigen::MatrixXd::Zero(4, 4);
-    A.block (0, 0, 3, 3) = m_A_cov.block (0, 0, 3, 3);
-    A(0, 3) = u0_squared * m_A_cov(0, 3) + 2 * Base::m_uq(0, 1) * m_A_cov(0,5) + u1_squared * m_A_cov(0, 4);
-    A(1, 3) = u0_squared * m_A_cov(1, 3) + 2 * Base::m_uq(0, 1) * m_A_cov(1,5) + u1_squared * m_A_cov(1, 4);
-    A(2, 3) = u0_squared * m_A_cov(2, 3) + 2 * Base::m_uq(0, 1) * m_A_cov(2,5) + u1_squared * m_A_cov(2, 4);
-    A(3, 3) = u0_squared * u0_squared * m_A_cov(3, 3) + 
-                u1_squared * u1_squared * m_A_cov(4, 4) +
-                    6 * ( u0_squared * u1_squared * m_A_cov(3, 4) ) +
-                        4 * ( u0_squared * Base::m_uq(0, 1) * m_A_cov(3, 5) ) +
-                            4 * ( u1_squared * Base::m_uq(0, 1) * m_A_cov(4, 5) );
-    A(3, 0) = A(0, 3);
-    A(3, 1) = A(1, 3);
-    A(3, 2) = A(2, 3);
-
-    Eigen::VectorXd F = Eigen::VectorXd::Zero(4);
-    F(0) = m_F_cov(0);
-    F(1) = m_F_cov(1);
-    F(2) = m_F_cov(2);
-    F(3) = u0_squared * m_F_cov(3) + 2 * Base::m_uq(0, 1) * m_F_cov(5) + u1_squared * m_F_cov(4);
-
-    Eigen::Matrix<Scalar, 4, 1> x = (A).bdcSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).solve(F);
-    Base::m_a *= x(3,0);
-
+    const Eigen::Matrix<Scalar, 1, 1> x = (A).bdcSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).solve(F);
+    Base::m_a *= x(0,0);
 }
 
 template < class DataPoint, class _WFunctor, typename T>
 void
 ParabolicCylinderFitImpl<DataPoint, _WFunctor, T>::m_uc_ul_parabolic_fitting () {
-    Scalar u0_squared = Base::m_uq(0, 0);
-    Scalar u1_squared = Base::m_uq(1, 1);
+    
+    Eigen::Matrix<Scalar, 4, 1> uq (Base::m_uq(0,0), Base::m_uq(1,0), Base::m_uq(0,1), Base::m_uq(1,1));
+    Eigen::Matrix<Scalar, 7, 1> F = m_F_cov - ( m_A_cov.block(0, 3, 7, 4) * uq * Base::m_a );
 
-    Scalar val_1 = Base::m_a * (u0_squared * m_A_cov(0, 3) + 2 * Base::m_uq(0, 1) * m_A_cov(0, 5) + u1_squared * m_A_cov(0, 4));
-    Scalar val_x = Base::m_a * (u0_squared * m_A_cov(1, 3) + 2 * Base::m_uq(0, 1) * m_A_cov(1, 5) + u1_squared * m_A_cov(1, 4));
-    Scalar val_y = Base::m_a * (u0_squared * m_A_cov(2, 3) + 2 * Base::m_uq(0, 1) * m_A_cov(2, 5) + u1_squared * m_A_cov(2, 4));
+    const Eigen::MatrixXd x = (m_A_cov.block(0, 0, 7, 3)).bdcSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).solve(F);
 
-    Eigen::MatrixXd A = Eigen::MatrixXd::Zero(3, 3);
-    A.block (0, 0, 3, 3) = m_A_cov.block (0, 0, 3, 3);
-
-    Eigen::VectorXd F = Eigen::VectorXd::Zero(3);
-    F(0) = m_F_cov(0) - val_1;
-    F(1) = m_F_cov(1) - val_x;
-    F(2) = m_F_cov(2) - val_y;
-
-    Eigen::Matrix<Scalar, 3, 1> x = (A).bdcSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).solve(F);
-
-    Base::m_uc = x(0,0);
+    Base::m_uc    = x(0,0);
     Base::m_ul(0) = x(1,0);
     Base::m_ul(1) = x(2,0);
 }
+
 
 template < class DataPoint, class _WFunctor, typename T>
 void

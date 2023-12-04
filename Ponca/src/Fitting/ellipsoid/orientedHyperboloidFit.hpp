@@ -92,9 +92,9 @@ OrientedHyperboloidFitImpl<DataPoint, _WFunctor, T>::m_uq_parabolic_fitting() {
     const Eigen::MatrixXd eigenVec = eig.eigenvectors();
     
     // 1 higher than 0
-    const VectorType eigenVec0 = eigenVec.col(1);
+    const VectorType eigenVec0 = eigenVec.col(2);
     // 0 is the littlest
-    const VectorType eigenVec1 = eigenVec.col(0);
+    const VectorType eigenVec1 = eigenVec.col(1);
     Eigen::Matrix<Scalar, 3, 2> eigenMat;
     eigenMat.col(0) = eigenVec0;
     eigenMat.col(1) = eigenVec1;

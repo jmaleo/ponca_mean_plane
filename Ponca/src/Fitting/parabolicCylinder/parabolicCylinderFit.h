@@ -27,8 +27,8 @@ protected:
     };
 
 public:
-    using SampleMatrix  = Eigen::Matrix<Scalar, Eigen::Dynamic, 7>;
-    using SampleVector  = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>;
+    using SampleMatrix  = Eigen::Matrix<Scalar, 7, 7>;
+    using SampleVector  = Eigen::Matrix<Scalar, 7, 1>;
     using Vector7       = Eigen::Matrix<Scalar, 7, 1>;
 
     // Todo : remove when differential properties are implemented in other class

@@ -24,7 +24,8 @@ protected:
     enum
     {
         check = Base::PROVIDES_PRIMITIVE_BASE,  /*!< \brief Requires PrimitiveBase */
-        PROVIDES_HYPERBOLOID,           /*!< \brief Provides Algebraic Cylinder */
+        // PROVIDES_HYPERBOLOID,           /*!< \brief Provides Algebraic Hyperboloid */
+        PROVIDES_ALGEBRAIC_ELLIPSOID,      /*!< \brief Provides Algebraic Ellipsoid */
         PROVIDES_NORMAL_DERIVATIVE             /*!< \brief Provides Normal Derivative */
     };
 
@@ -74,7 +75,7 @@ public:
     /*! \brief Approximation of the scalar field gradient at the evaluation point */
     PONCA_MULTIARCH inline VectorType primitiveGradient () const { return primitiveGradient(Base::m_w.basisCenter()); }
 
-    MatrixType dNormal() const {return 2 * m_uq / m_ul.norm();}
+    MatrixType dNormal() const { return 2 * m_uq / m_ul.norm(); }
 
     // f(x) = uc + ul^T x + x^T Uq x
     //      = uc + ul^T x + x^T P D P^T x

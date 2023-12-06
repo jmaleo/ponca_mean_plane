@@ -23,6 +23,8 @@ struct Triangle {
         typedef typename DataPoint::Scalar Scalar;
         typedef typename DataPoint::VectorType VectorType;        
         typedef typename DataPoint::MatrixType MatrixType;
+
+        using CNCEigen_s = CNCEigen < Scalar >;
         
         std::array < VectorType, 3 > points;
         std::array < VectorType, 3 > normals;
@@ -44,24 +46,24 @@ struct Triangle {
         }
 
         inline Scalar mu0InterpolatedU      () { 
-            return CNCEigen::mu0InterpolatedU  (points[0], points[1], points[2], normals[0], normals[1], normals[2]);
+            return CNCEigen_s::mu0InterpolatedU  (points[0], points[1], points[2], normals[0], normals[1], normals[2]);
         }
 
         inline Scalar mu1InterpolatedU      (bool differentOrder = false) { 
             return (differentOrder) ? 
-                  CNCEigen::mu1InterpolatedU  (points[0], points[2], points[1], normals[0], normals[2], normals[1])
-                : CNCEigen::mu1InterpolatedU  (points[0], points[1], points[2], normals[0], normals[1], normals[2]); 
+                  CNCEigen_s::mu1InterpolatedU  (points[0], points[2], points[1], normals[0], normals[2], normals[1])
+                : CNCEigen_s::mu1InterpolatedU  (points[0], points[1], points[2], normals[0], normals[1], normals[2]); 
         }
         inline Scalar mu2InterpolatedU      (bool differentOrder = false) { 
             return (differentOrder) ? 
-                  CNCEigen::mu2InterpolatedU  (points[0], points[2], points[1], normals[0], normals[2], normals[1]) 
-                : CNCEigen::mu2InterpolatedU  (points[0], points[1], points[2], normals[0], normals[1], normals[2]); 
+                  CNCEigen_s::mu2InterpolatedU  (points[0], points[2], points[1], normals[0], normals[2], normals[1]) 
+                : CNCEigen_s::mu2InterpolatedU  (points[0], points[1], points[2], normals[0], normals[1], normals[2]); 
             }
 
         inline MatrixType muXYInterpolatedU (bool differentOrder = false) { 
             return (differentOrder) ? 
-                  CNCEigen::muXYInterpolatedU (points[0], points[2], points[1], normals[0], normals[2], normals[1])
-                : CNCEigen::muXYInterpolatedU (points[0], points[1], points[2], normals[0], normals[1], normals[2]); }
+                  CNCEigen_s::muXYInterpolatedU (points[0], points[2], points[1], normals[0], normals[2], normals[1])
+                : CNCEigen_s::muXYInterpolatedU (points[0], points[1], points[2], normals[0], normals[1], normals[2]); }
 
 };
 
@@ -84,6 +86,8 @@ class TriangleGeneration : public T
     PONCA_FITTING_DECLARE_MATRIX_TYPE
     typedef Eigen::VectorXd  DenseVector;
     typedef Eigen::MatrixXd  DenseMatrix;
+
+    using CNCEigen_s = CNCEigen < Scalar >;
 
 protected:
     enum

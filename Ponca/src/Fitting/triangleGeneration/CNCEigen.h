@@ -81,8 +81,8 @@ struct CNCEigen {
       return ( ( fabs(alpha) < epsilon )
 	       || ( fabs(beta) < epsilon )
 	       || ( fabs(gamma) < epsilon ) )
-	? 0.0
-	: 2.0*M_PI - alpha - beta - gamma;
+	? Scalar(0.0)
+	: Scalar(2.0*M_PI - alpha - beta - gamma);
     }
     
     /// @return the (signed) area of the spherical triangle (below 2pi).
@@ -93,8 +93,8 @@ struct CNCEigen {
       Scalar  S = area(a,b,c);
       Vector3 M = a + b + c;
       Vector3 X = ( b - a ).cross( c - a );
-      if ( M.lpNorm<1>() <= epsilon || X.lpNorm<1>() <= epsilon ) return 0.0;
-      return M.dot( X ) < 0.0 ? -S : S;
+      if ( M.template lpNorm<1>() <= epsilon || X.template lpNorm<1>() <= epsilon ) return Scalar(0.0);
+      return M.dot( X ) < Scalar(0.0) ? -S : S;
     }
   };
   
@@ -134,7 +134,7 @@ public:
       auto uM_norm = uM.norm();
       uM = uM_norm == 0.0 ? uM : uM / uM_norm;
     }
-    return 0.5 * (( b - a ).cross( c - a )).dot( uM );
+    return Scalar(0.5 * (( b - a ).cross( c - a )).dot( uM ));
   }
   
   
@@ -163,9 +163,9 @@ public:
     // MU1=1/2( | uM u_C-u_B A | + | uM u_A-u_C B | + | uM u_B-u_A C |
     Eigen::Vector<Scalar, 3> uM = ( ua+ub+uc ) / 3.0;
     if ( unit_u )  uM /= uM.norm();
-    return 0.25 * ( uM.cross( uc - ub ).dot( a )
+    return Scalar( 0.25 * ( uM.cross( uc - ub ).dot( a )
                    + uM.cross( ua - uc ).dot( b )
-                   + uM.cross( ub - ua ).dot( c ) );
+                   + uM.cross( ub - ua ).dot( c ) ) );
   }
   
   
@@ -197,7 +197,7 @@ public:
     if ( unit_u )
       return SphericalTriangle::algebraicArea( ua,ub,uc);
     else
-      return 0.5 * ( ua.cross( ub ).dot( uc ) );
+      return Scalar( 0.5 * ( ua.cross( ub ).dot( uc ) ) );
   }
   
   

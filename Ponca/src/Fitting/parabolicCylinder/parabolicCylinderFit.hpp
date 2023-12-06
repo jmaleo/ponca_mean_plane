@@ -85,7 +85,7 @@ template < class DataPoint, class _WFunctor, typename T>
 void
 ParabolicCylinderFitImpl<DataPoint, _WFunctor, T>::m_ellipsoid_fitting () {
 
-    Eigen::BDCSVD<Eigen::MatrixXd> svd(m_A_cov, Eigen::ComputeThinU | Eigen::ComputeThinV);
+    Eigen::BDCSVD<Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic>> svd(m_A_cov, Eigen::ComputeThinU | Eigen::ComputeThinV);
     const Vector7 x = svd.solve(m_F_cov);
 
     Base::m_uc      = x(0,0);     
@@ -103,8 +103,8 @@ ParabolicCylinderFitImpl<DataPoint, _WFunctor, T>::m_uq_parabolic_fitting () {
     PONCA_MULTIARCH_STD_MATH(abs);
     constexpr Scalar epsilon = Eigen::NumTraits<Scalar>::dummy_precision();
 
-    Eigen::SelfAdjointEigenSolver<Eigen::Matrix2d> eig(Base::m_uq);
-    Eigen::Vector2d values = eig.eigenvalues();
+    Eigen::SelfAdjointEigenSolver<Matrix2> eig(Base::m_uq);
+    Vector2 values = eig.eigenvalues();
 
     int higher = abs(values(0)) > abs(values(1)) ? 0 : 1;
 
@@ -116,7 +116,7 @@ ParabolicCylinderFitImpl<DataPoint, _WFunctor, T>::m_uq_parabolic_fitting () {
     if (abs(lambda0 + 1/t) > epsilon)
         alpha = 2 * (abs(lambda0) - abs(lambda1)) / (abs(lambda0) + 1 / t);
     Base::m_a = ( alpha < 1 ) ? alpha : Scalar(1);
-    const Eigen::MatrixXd eigenVec = eig.eigenvectors();
+    const Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic> eigenVec = eig.eigenvectors();
 
     Base::m_uq = eigenVec.col(higher) * eigenVec.col(higher).transpose();
 
@@ -151,7 +151,7 @@ ParabolicCylinderFitImpl<DataPoint, _WFunctor, T>::m_uc_ul_parabolic_fitting () 
     Eigen::Matrix<Scalar, 4, 1> uq (Base::m_uq(0,0), Base::m_uq(1,0), Base::m_uq(0,1), Base::m_uq(1,1));
     Eigen::Matrix<Scalar, 7, 1> F = m_F_cov - ( m_A_cov.block(0, 3, 7, 4) * uq * Base::m_a );
 
-    const Eigen::MatrixXd x = (m_A_cov.block(0, 0, 7, 3)).bdcSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).solve(F);
+    const Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic> x = (m_A_cov.block(0, 0, 7, 3)).bdcSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).solve(F);
 
     Base::m_uc    = x(0,0);
     Base::m_ul(0) = x(1,0);

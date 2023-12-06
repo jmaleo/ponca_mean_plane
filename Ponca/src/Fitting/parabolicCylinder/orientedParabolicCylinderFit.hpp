@@ -205,7 +205,7 @@ OrientedParabolicCylinderFitImpl<DataPoint, _WFunctor, T>::m_uq_parabolic_fittin
     PONCA_MULTIARCH_STD_MATH(abs);
     constexpr Scalar epsilon = Eigen::NumTraits<Scalar>::dummy_precision();
 
-    Eigen::SelfAdjointEigenSolver<Eigen::Matrix2d> eig(Base::m_uq);
+    Eigen::SelfAdjointEigenSolver<Matrix2> eig(Base::m_uq);
     Vector2 values = eig.eigenvalues();
 
     int higher = abs(values(0)) > abs(values(1)) ? 0 : 1;
@@ -220,7 +220,7 @@ OrientedParabolicCylinderFitImpl<DataPoint, _WFunctor, T>::m_uq_parabolic_fittin
         alpha = 2 * (abs(lambda0) - abs(lambda1)) / (abs(lambda0) + 1 / t);
     Base::m_a = ( alpha < Scalar(1) ) ? alpha : Scalar(1);
 
-    const Eigen::MatrixXd eigenVec = eig.eigenvectors();
+    const Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic> eigenVec = eig.eigenvectors();
     Base::m_uq = eigenVec.col(higher) * eigenVec.col(higher).transpose();
 
     VectorType v1 = VectorType(0, eigenVec.col( 0 )(0), eigenVec.col( 0 )(1));

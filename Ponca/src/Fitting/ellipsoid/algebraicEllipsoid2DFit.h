@@ -48,9 +48,9 @@ public:
         else {
             FIT_RESULT res = Base::finalize();
 
-            Eigen::SelfAdjointEigenSolver<Eigen::Matrix2d> eig( - 2.0 * Base::m_a * Base::m_uq);
-            Eigen::Vector2d values = eig.eigenvalues();
-            Eigen::MatrixXd eigenVec = eig.eigenvectors();
+            Eigen::SelfAdjointEigenSolver<Eigen::Matrix<Scalar, 2, 2>> eig( - 2.0 * Base::m_a * Base::m_uq);
+            Eigen::Vector<Scalar, 2> values = eig.eigenvalues();
+            Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic> eigenVec = eig.eigenvectors();
 
             Base::m_k1 = values(0);
             VectorType v1 = VectorType(0, eigenVec.col(0)(0), eigenVec.col(0)(1));

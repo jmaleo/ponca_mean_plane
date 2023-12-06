@@ -61,9 +61,9 @@ struct CNCEigen {
         alpha = beta = gamma = 0.0;
       else
       {
-        Scalar ca = std::max( -1.0, std::min( 1.0, Tb.dot( Tc ) ) );
-        Scalar cb = std::max( -1.0, std::min( 1.0, Tc.dot( Ta ) ) );
-        Scalar cc = std::max( -1.0, std::min( 1.0, Ta.dot( Tb ) ) );
+        Scalar ca = std::max( Scalar(-1.0), std::min( Scalar(1.0), Tb.dot( Tc ) ) );
+        Scalar cb = std::max( Scalar(-1.0), std::min( Scalar(1.0), Tc.dot( Ta ) ) );
+        Scalar cc = std::max( Scalar(-1.0), std::min( Scalar(1.0), Ta.dot( Tb ) ) );
         alpha     = acos( ca );
         beta      = acos( cb );
         gamma     = acos( cc );

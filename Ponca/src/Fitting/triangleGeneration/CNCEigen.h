@@ -11,7 +11,7 @@ struct CNCEigen {
   struct SphericalTriangle {
     
     ///Spherical point data type
-    typedef Eigen::Vector3<Scalar, 3> Vector3;
+    typedef Eigen::Vector<Scalar, 3> Vector3;
     
     static
     bool

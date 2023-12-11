@@ -62,6 +62,7 @@ ParabolicCylinderFitImpl<DataPoint, _WFunctor, T>::finalize () {
     }
     else {
         m_fitting_process();
+
         return Base::m_eCurrentState = STABLE;
     }
 }
@@ -71,6 +72,7 @@ void
 ParabolicCylinderFitImpl<DataPoint, _WFunctor, T>::m_fitting_process () {
     
     m_ellipsoid_fitting();
+    Base::m_correctOrientation = -1;
 
     if (Base::m_isCylinder) {
         m_uq_parabolic_fitting();
@@ -85,8 +87,7 @@ template < class DataPoint, class _WFunctor, typename T>
 void
 ParabolicCylinderFitImpl<DataPoint, _WFunctor, T>::m_ellipsoid_fitting () {
 
-    Eigen::BDCSVD<Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic>> svd(m_A_cov, Eigen::ComputeThinU | Eigen::ComputeThinV);
-    const Vector7 x = svd.solve(m_F_cov);
+    const Vector7 x = m_A_cov.bdcSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).solve(m_F_cov);
 
     Base::m_uc      = x(0,0);     
     Base::m_ul(0)   = x(1,0);  
@@ -162,7 +163,7 @@ ParabolicCylinderFitImpl<DataPoint, _WFunctor, T>::m_uc_ul_parabolic_fitting () 
 template < class DataPoint, class _WFunctor, typename T>
 void
 ParabolicCylinderFitImpl<DataPoint, _WFunctor, T>::m_compute_curvature() {
-    Scalar curv = - Scalar(2) * Base::m_a;
+    Scalar curv = Base::m_correctOrientation * Scalar(2) * Base::m_a;
 
     if (curv <= 0) {
         Base::m_k1 = curv;

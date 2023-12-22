@@ -5,10 +5,10 @@ TriangleGeneration<DataPoint, _WFunctor, T>::computeNeighbors(const DataPoint &e
     
     _nb_vt = 0; // Number of valid generated triangles
     _normale = evalPoint.normal();
-    std::vector<int> indices(_attribNeigs.size());
 
     if (_method == Method::IndependentGeneration) {
         // Shuffle the neighbors
+        std::vector<int> indices(_attribNeigs.size());
         for (int i = 0; i < indices.size(); ++i)
             indices[i] = i;
         std::random_device rd;
@@ -125,18 +125,14 @@ TriangleGeneration<DataPoint, _WFunctor, T>::construct_hexa(const DataPoint &eva
     VectorType a;
     a.setZero();
 
-    int iSource = -1;
+    int iSource = 0;
     Scalar avgd = Scalar(0);
 
     for ( int i = 0 ; i < _attribNeigs.size() ; i++ ) {
         avgd += ( _attribNeigs[ i ] - c ).norm();
         a    += _normNeigs[ i ];
-        // if avgd == 0 then it is the evalPoint
-        if ( iSource == -1 && _attribNeigs[ i ] == c  ) {
-            iSource = i;
-        }
     }
-    
+
     a /= a.norm();
     n = ( Scalar(1) - _avgnormals ) * n + _avgnormals * a;
     n /= n.norm();

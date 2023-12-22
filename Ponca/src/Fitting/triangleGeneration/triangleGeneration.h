@@ -156,6 +156,8 @@ public:
         v1 = VectorType::Zero();
         v2 = VectorType::Zero();
 
+        _nb_vt = 0;
+
         // Instantiate the parameters
         _maxtriangles = 100;
         _method = Method::UniformGeneration;

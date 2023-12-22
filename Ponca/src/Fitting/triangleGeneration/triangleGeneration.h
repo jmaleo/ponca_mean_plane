@@ -131,6 +131,7 @@ protected:
     // Hexagram
     std::array< Scalar    ,    6 > _distance2;
     std::array< VectorType,    6 > _targets;
+    std::array<int, 6> _indices = {0, 0, 0, 0, 0, 0};
 
 // results
 public:
@@ -157,6 +158,8 @@ public:
         v2 = VectorType::Zero();
 
         _nb_vt = 0;
+
+        _indices = {0, 0, 0, 0, 0, 0};
 
         // Instantiate the parameters
         _maxtriangles = 100;

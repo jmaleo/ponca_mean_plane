@@ -125,7 +125,7 @@ TriangleGeneration<DataPoint, _WFunctor, T>::construct_hexa(const DataPoint &eva
     VectorType a;
     a.setZero();
 
-    int iSource = 0;
+    // int iSource = 0;
     Scalar avgd = Scalar(0);
 
     for ( int i = 0 ; i < _attribNeigs.size() ; i++ ) {
@@ -151,31 +151,32 @@ TriangleGeneration<DataPoint, _WFunctor, T>::construct_hexa(const DataPoint &eva
     u /= u.norm();
     v /= v.norm();
 
-    std::array<int, 6> indices = {iSource, iSource, iSource, iSource, iSource, iSource};
+    // std::array<int, 6> indices = {iSource, iSource, iSource, iSource, iSource, iSource};
+    // Here it's _indices creating during the init
 
     for ( int i = 0 ; i < 6 ; i++ ){
         _distance2 [ i ] = avgd * avgd;
         _targets   [ i ] = avgd * ( u * _cos[ i ] + v * _sin[ i ] );
     }
 
-    for ( int i = 0 ; i < _attribNeigs.size() ; i++ ){
+    for ( int i = 1 ; i < _attribNeigs.size() ; i++ ){
         VectorType p = _attribNeigs[ i ];
-        if ( p == c ) continue;
+        // if ( p == c ) continue;
             
         const VectorType w = p - c;
         for ( int j = 0 ; j < 6 ; j++ ){
             const Scalar d2 = ( w - _targets[ j ]).squaredNorm();
             if ( d2 < _distance2[ j ] ){
-                indices[ j ] = i;
+                _indices[ j ] = i;
                 _distance2[ j ] = d2;
             }
         }
     }
-    std::array <VectorType, 3> t1_points = {_attribNeigs[indices[0]], _attribNeigs[indices[2]], _attribNeigs[indices[4]]};
-    std::array <VectorType, 3> t1_normals = {_normNeigs[indices[0]], _normNeigs[indices[2]], _normNeigs[indices[4]]};
+    std::array <VectorType, 3> t1_points = {_attribNeigs[_indices[0]], _attribNeigs[_indices[2]], _attribNeigs[_indices[4]]};
+    std::array <VectorType, 3> t1_normals = {_normNeigs[_indices[0]], _normNeigs[_indices[2]], _normNeigs[_indices[4]]};
 
-    std::array <VectorType, 3> t2_points = {_attribNeigs[indices[1]], _attribNeigs[indices[3]], _attribNeigs[indices[5]]};
-    std::array <VectorType, 3> t2_normals = {_normNeigs[indices[1]], _normNeigs[indices[3]], _normNeigs[indices[5]]};
+    std::array <VectorType, 3> t2_points = {_attribNeigs[_indices[1]], _attribNeigs[_indices[3]], _attribNeigs[_indices[5]]};
+    std::array <VectorType, 3> t2_normals = {_normNeigs[_indices[1]], _normNeigs[_indices[3]], _normNeigs[_indices[5]]};
 
     _triangles.push_back(Triangle<DataPoint>(t1_points, t1_normals));
     _triangles.push_back(Triangle<DataPoint>(t2_points, t2_normals));

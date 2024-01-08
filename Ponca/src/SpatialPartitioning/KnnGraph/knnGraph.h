@@ -60,9 +60,8 @@ public:
 
     // knnGraph ----------------------------------------------------------------
 public:
-    /// \brief Build a KnnGraph from a KdTree
+    /// \brief Build a KnnGraph from a KdTreeDense
     ///
-    /// \warning In the current version, the graph does not support kdtree with subsampling
     /// \param k Number of requested neighbors. Might be reduced if k is larger than the kdtree size - 1
     ///          (query point is not included in query output, thus -1)
     ///
@@ -70,14 +69,14 @@ public:
     /// \warning KdTreeTraits compatibility is checked with static assertion
     template<typename KdTreeTraits>
     inline KnnGraphBase(const KdTreeBase<KdTreeTraits>& kdtree, int k = 6)
-            : m_k(std::min(k,kdtree.index_count()-1)),
-              m_kdTreePoints(kdtree.point_data())
+            : m_k(std::min(k,kdtree.sample_count()-1)),
+              m_kdTreePoints(kdtree.points())
     {
-        static_assert( std::is_same_v<typename Traits::DataPoint, typename KdTreeTraits::DataPoint>,
+        static_assert( std::is_same<typename Traits::DataPoint, typename KdTreeTraits::DataPoint>::value,
                        "KdTreeTraits::DataPoint is not equal to Traits::DataPoint" );
-        static_assert( std::is_same_v<typename Traits::PointContainer, typename KdTreeTraits::PointContainer>,
+        static_assert( std::is_same<typename Traits::PointContainer, typename KdTreeTraits::PointContainer>::value,
                        "KdTreeTraits::PointContainer is not equal to Traits::PointContainer" );
-        static_assert( std::is_same_v<typename Traits::IndexContainer, typename KdTreeTraits::IndexContainer>,
+        static_assert( std::is_same<typename Traits::IndexContainer, typename KdTreeTraits::IndexContainer>::value,
                        "KdTreeTraits::IndexContainer is not equal to Traits::IndexContainer" );
 
         // We need to account for the entire point set, irrespectively of the sampling. This is because the kdtree
@@ -85,7 +84,7 @@ public:
         // \fixme Update API to properly handle kdtree subsampling
         const int cloudSize   = kdtree.point_count();
         {
-            const int samplesSize = kdtree.index_count();
+            const int samplesSize = kdtree.sample_count();
             eigen_assert(cloudSize == samplesSize);
         }
 
@@ -107,7 +106,7 @@ public:
     // Query -------------------------------------------------------------------
 public:
     inline KNearestIndexQuery k_nearest_neighbors(int index) const{
-        return KnnGraphKNearestQuery(this, index);
+        return KNearestIndexQuery(this, index);
     }
 
     inline RangeIndexQuery    range_neighbors(int index, Scalar r) const{

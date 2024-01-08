@@ -70,7 +70,7 @@ void testBasicFunctionalities(const KdTree<typename Fit::DataPoint>& tree, typen
     typedef typename DataPoint::VectorType VectorType;
     typedef typename Fit::WFunctor WeightFunc;
 
-    const auto& vectorPoints = tree.point_data();
+    const auto& vectorPoints = tree.points();
 
     // Test for each point if the fitted sphere correspond to the theoretical sphere
 #ifdef NDEBUG
@@ -135,7 +135,7 @@ void testIsSame(const KdTree<typename Fit1::DataPoint>& tree,
     typedef typename Fit1::Scalar     Scalar;
     typedef typename Fit1::VectorType VectorType;
     typedef typename Fit1::WFunctor   WeightFunc;
-    const auto& vectorPoints = tree.point_data();
+    const auto& vectorPoints = tree.points();
 
     // Test for each point if the fitted sphere correspond to the theoretical sphere
 #ifdef NDEBUG
@@ -230,7 +230,7 @@ void callSubTests()
     using HybridSpaceDiff = BasketDiff<Hybrid, FitSpaceDer, CovariancePlaneDer>;
     using HybridScaleSpaceDiff = BasketDiff<Hybrid, FitScaleSpaceDer, CovariancePlaneDer>;
 
-    KdTree<Point>tree;
+    KdTreeDense<Point> tree;
     Scalar scale = generateData(tree);
 
     for(int i = 0; i < g_repeat; ++i)

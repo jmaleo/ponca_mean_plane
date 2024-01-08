@@ -48,74 +48,44 @@ inline void KdTreeBase<Traits>::buildWithSampling(PointUserContainer&& points,
 }
 
 template<typename Traits>
-template<typename IndexUserContainer>
-inline void KdTreeBase<Traits>::rebuild(IndexUserContainer sampling)
-{
-    PONCA_DEBUG_ASSERT(sampling.size() <= m_points->size());
-
-    m_nodes.clear();
-    m_nodes.emplace_back();
-
-    m_indices = std::move(sampling);
-
-    this->build_rec(0, 0, index_count(), 1);
-
-    PONCA_DEBUG_ASSERT(this->valid());
-}
-
-template<typename Traits>
 bool KdTreeBase<Traits>::valid() const
 {
-    PONCA_DEBUG_ERROR;
-    return false;
-
     if (m_points.empty())
         return m_nodes.empty() && m_indices.empty();
-        
+
     if(m_nodes.empty() || m_indices.empty())
     {
-        PONCA_DEBUG_ERROR;
         return false;
     }
-        
-    if(point_count() < index_count())
-    {
-        PONCA_DEBUG_ERROR;
-        return false;
-    }
-        
+
     std::vector<bool> b(point_count(), false);
     for(IndexType idx : m_indices)
     {
         if(idx < 0 || point_count() <= idx || b[idx])
         {
-            PONCA_DEBUG_ERROR;
             return false;
         }
         b[idx] = true;
     }
 
-    for(NodeCountType n=0;n<node_count();++n)
+    for(NodeIndexType n=0;n<node_count();++n)
     {
-        const NodeType& node = m_nodes.operator[](n);
+        const NodeType& node = m_nodes[n];
         if(node.is_leaf())
         {
-            if(index_count() <= node.leaf.start || index_count() < node.leaf.start+node.leaf.size)
+            if(index_count() <= node.leaf_start() || node.leaf_start()+node.leaf_size() > index_count())
             {
-                PONCA_DEBUG_ERROR;
                 return false;
             }
         }
         else
         {
-            if(node.inner.dim < 0 || 2 < node.inner.dim)
+            if(node.inner_split_dim() < 0 || DataPoint::Dim-1 < node.inner_split_dim())
             {
-                PONCA_DEBUG_ERROR;
                 return false;
             }
-            if(node_count() <= node.inner.first_child_id || node_count() <= node.inner.first_child_id+1)
+            if(node_count() <= node.inner_first_child_id() || node_count() <= node.inner_first_child_id()+1)
             {
-                PONCA_DEBUG_ERROR;
                 return false;
             }
         }
@@ -125,62 +95,85 @@ bool KdTreeBase<Traits>::valid() const
 }
 
 template<typename Traits>
-std::string KdTreeBase<Traits>::to_string() const
+std::string KdTreeBase<Traits>::to_string(bool verbose) const
 {
-    if (m_indices.empty()) return "";
-    
     std::stringstream str;
-    str << "indices (" << index_count() << ") :\n";
-    for(IndexType i=0; i<index_count(); ++i)
+
+    str << "KdTree:";
+    str << "\n  MaxNodes: " << MAX_NODE_COUNT;
+    str << "\n  MaxPoints: " << MAX_POINT_COUNT;
+    str << "\n  MaxDepth: " << Traits::MAX_DEPTH;
+    str << "\n  PointCount: " << point_count();
+    str << "\n  SampleCount: " << index_count();
+    str << "\n  NodeCount: " << node_count();
+
+    if (!verbose)
     {
-        str << "  " << i << ": " << m_indices.operator[](i) << "\n";
+        return str.str();
     }
-    str << "nodes (" << node_count() << ") :\n";
-    for(NodeCountType n=0; n< node_count(); ++n)
+
+    str << "\n  Samples: [";
+    static constexpr IndexType SAMPLES_PER_LINE = 10;
+    for (IndexType i = 0; i < index_count(); ++i)
     {
-        const NodeType& node = m_nodes.operator[](n);
-        if(node.is_leaf())
+        str << (i == 0 ? "" : ",");
+        str << (i % SAMPLES_PER_LINE == 0 ? "\n    " : " ");
+        str << m_indices[i];
+    }
+
+    str << "]\n  Nodes:";
+    for (NodeIndexType n = 0; n < node_count(); ++n)
+    {
+        const NodeType& node = m_nodes[n];
+        if (node.is_leaf())
         {
-            auto end = node.leaf.start + node.leaf.size;
-            str << "  leaf: start=" << node.leaf.start << " end=" << end << " (size=" << node.leaf.size << ")\n";
+            str << "\n    - Type: Leaf";
+            str << "\n      Start: " << node.leaf_start();
+            str << "\n      Size: " << node.leaf_size();
         }
         else
         {
-            str << "  node: dim=" << node.inner.dim << " split=" << node.inner.split_value << " child=" << node.inner.first_child_id << "\n";
+            str << "\n    - Type: Inner";
+            str << "\n      SplitDim: " << node.inner_split_dim();
+            str << "\n      SplitValue: " << node.inner_split_value();
+            str << "\n      FirstChild: " << node.inner_first_child_id();
         }
     }
+
     return str.str();
 }
 
 template<typename Traits>
-void KdTreeBase<Traits>::build_rec(NodeCountType node_id, IndexType start, IndexType end, int level)
+void KdTreeBase<Traits>::build_rec(NodeIndexType node_id, IndexType start, IndexType end, int level)
 {
     NodeType& node = m_nodes[node_id];
     AabbType aabb;
     for(IndexType i=start; i<end; ++i)
         aabb.extend(m_points[m_indices[i]].pos());
 
-    node.set_is_leaf(end-start <= m_min_cell_size || level >= Traits::MAX_DEPTH);
+    node.set_is_leaf(
+        end-start <= m_min_cell_size ||
+        level >= Traits::MAX_DEPTH ||
+        // Since we add 2 nodes per inner node we need to stop if we can't add
+        // them both
+        (NodeIndexType)m_nodes.size() > MAX_NODE_COUNT - 2);
+
+    node.configure_range(start, end-start, aabb);
     if (node.is_leaf())
     {
-        node.leaf.start = start;
-        node.leaf.size = static_cast<LeafSizeType>(end-start);
         ++m_leaf_count;
     }
     else
     {
-        int dim = 0;
-        (Scalar(0.5) * (aabb.max() - aabb.min())).maxCoeff(&dim);
-        node.inner.dim = dim;
-        node.inner.split_value = aabb.center()[dim];
-
-        IndexType mid_id = this->partition(start, end, dim, node.inner.split_value);
-        node.inner.first_child_id = m_nodes.size();
+        int split_dim = 0;
+        (Scalar(0.5) * aabb.diagonal()).maxCoeff(&split_dim);
+        node.configure_inner(aabb.center()[split_dim], m_nodes.size(), split_dim);
         m_nodes.emplace_back();
         m_nodes.emplace_back();
 
-        build_rec(node.inner.first_child_id, start, mid_id, level+1);
-        build_rec(node.inner.first_child_id+1, mid_id, end, level+1);
+        IndexType mid_id = this->partition(start, end, split_dim, node.inner_split_value());
+        build_rec(node.inner_first_child_id(), start, mid_id, level+1);
+        build_rec(node.inner_first_child_id()+1, mid_id, end, level+1);
     }
 }
 

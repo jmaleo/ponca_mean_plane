@@ -11,6 +11,7 @@
 
 #include <vector>
 #include <stack>
+#include <set>
 
 namespace Ponca {
 template <typename Traits> class KnnGraphBase;
@@ -33,29 +34,28 @@ public:
     inline KnnGraphRangeQuery(const KnnGraphBase<Traits>* graph, Scalar radius, int index):
             QueryType(radius, index),
             m_graph(graph),
-            m_flag(graph->size()),
+            m_flag(),
             m_stack() {}
 
 public:
     inline Iterator begin(){
-        KnnGraphRangeIterator it(this);
+        Iterator it(this);
         this->initialize(it);
         this->advance(it);
         return it;
     }
 
     inline Iterator end(){
-        return KnnGraphRangeIterator(this, m_graph->size());
+        return Iterator(this, m_graph->size());
     }
 
 protected:
     inline void initialize(Iterator& iterator){
-        m_flag.resize(m_graph->size());
-        std::fill(m_flag.begin(), m_flag.end(), false);
+        m_flag.clear();
+        m_flag.insert(QueryType::input());
 
         PONCA_DEBUG_ASSERT(m_stack.empty());
         m_stack.push(QueryType::input());
-        m_flag[QueryType::input()] = true;
 
         iterator.m_index = -1;
     }
@@ -75,18 +75,17 @@ protected:
             int idx_current = m_stack.top();
             m_stack.pop();
 
-            PONCA_DEBUG_ASSERT((point - points[idx_current]).squaredNorm() < m_squared_radius);
+            PONCA_DEBUG_ASSERT((point - points[idx_current].pos()).squaredNorm() < QueryType::squared_radius());
 
             iterator.m_index = idx_current;
 
             for(int idx_nei : m_graph->k_nearest_neighbors(idx_current))
             {
-                PONCA_DEBUG_ASSERT(idx_nei>0);
+                PONCA_DEBUG_ASSERT(idx_nei>=0);
                 Scalar d  = (point - points[idx_nei].pos()).squaredNorm();
                 Scalar th = QueryType::descentDistanceThreshold();
-                if(!m_flag[idx_nei] && (point - points[idx_nei].pos()).squaredNorm() < QueryType::descentDistanceThreshold())
+                if((point - points[idx_nei].pos()).squaredNorm() < QueryType::descentDistanceThreshold() && m_flag.insert(idx_nei).second)
                 {
-                    m_flag[idx_nei] = true;
                     m_stack.push(idx_nei);
                 }
             }
@@ -96,8 +95,8 @@ protected:
 
 protected:
     const KnnGraphBase<Traits>*   m_graph {nullptr};
-    std::vector<bool> m_flag;  ///< hold ids status (ids range from 0 to point cloud size)
-    std::stack<int>   m_stack; ///< hold ids (ids range from 0 to point cloud size)
+    std::set<int> m_flag;       ///< store visited ids
+    std::stack<int>   m_stack;  ///< hold ids (ids range from 0 to point cloud size)
 };
 
 } // namespace Ponca

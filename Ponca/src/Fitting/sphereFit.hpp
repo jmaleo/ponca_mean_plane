@@ -41,12 +41,14 @@ FIT_RESULT
 SphereFitImpl<DataPoint, _WFunctor, T>::finalize ()
 {
     // Compute status
-    if(Base::finalize() != STABLE || Base::getNumNeighbors() < 3)
+    if(Base::finalize() != STABLE)
+        return Base::m_eCurrentState;
+    if(Base::getNumNeighbors() < DataPoint::Dim)
         return Base::m_eCurrentState = UNDEFINED;
     if (Base::algebraicSphere().isValid())
         Base::m_eCurrentState = CONFLICT_ERROR_FOUND;
     else
-        Base::m_eCurrentState = Base::getNumNeighbors() < 6 ? UNSTABLE : STABLE;
+        Base::m_eCurrentState = Base::getNumNeighbors() < 2*DataPoint::Dim ? UNSTABLE : STABLE;
 
     MatrixA matC;
     matC.setIdentity();
@@ -62,17 +64,18 @@ SphereFitImpl<DataPoint, _WFunctor, T>::finalize ()
     invCpratt.template topLeftCorner<1,1>()     << 0;
     invCpratt.template bottomRightCorner<1,1>() << 0;
 
-    MatrixA M = invCpratt * m_matA;
-    // go to positive semi-definite matrix to be compatible with
-    // SelfAdjointEigenSolver requirements
-    // Note: This does not affect the eigen vectors order
-    Eigen::SelfAdjointEigenSolver<MatrixA> solver;
+    // Remarks:
+    //   A and C are symmetric so all eigenvalues and eigenvectors are real
+    //   we look for the minimal positive eigenvalue (eigenvalues may be negative)
+    //   C^{-1}A is not symmetric
+    //   calling Eigen::GeneralizedEigenSolver on (A,C) and Eigen::EigenSolver on C^{-1}A is equivalent
+    //   C is not positive definite so Eigen::GeneralizedSelfAdjointEigenSolver cannot be used
 #ifdef __CUDACC__
-    solver.computeDirect(M.transpose() * M);
+    m_solver.computeDirect(invCpratt * m_matA);
 #else
-    solver.compute(M.transpose() * M);
+    m_solver.compute(invCpratt * m_matA);
 #endif
-    VectorA eivals = solver.eigenvalues().real();
+    VectorA eivals = m_solver.eigenvalues().real();
     int minId = -1;
     for(int i=0 ; i<DataPoint::Dim+2 ; ++i)
     {
@@ -82,7 +85,7 @@ SphereFitImpl<DataPoint, _WFunctor, T>::finalize ()
     }
 
     //mLambda = eivals(minId);
-    VectorA vecU = solver.eigenvectors().col(minId).real();
+    VectorA vecU = m_solver.eigenvectors().col(minId).real();
     Base::m_uq = vecU[1+DataPoint::Dim];
     Base::m_ul = vecU.template segment<DataPoint::Dim>(1);
     Base::m_uc = vecU[0];

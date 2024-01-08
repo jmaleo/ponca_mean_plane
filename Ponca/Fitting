@@ -26,6 +26,8 @@
 
 #include "src/Fitting/ellipsoid/hyperboloid.h"
 
+#include "src/Fitting/varifold.h"
+
 
 // Fitting tools
 #include "src/Fitting/mean.h"

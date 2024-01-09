@@ -129,7 +129,7 @@ OrientedParabolicCylinderFitImpl<DataPoint, _WFunctor, T>::addLocalNeighbor(Scal
         VectorType localPos = Base::worldToLocalFrame(attributes.pos());
         Vector2 planePos = Vector2 ( *(localPos.data()+1), *(localPos.data()+2) );
 
-        VectorType localNorm =  Base::template worldToLocalFrame<true>(attributes.normal());
+        VectorType localNorm = Base::m_correctOrientation * Base::template worldToLocalFrame<true>(attributes.normal());
         Vector2 planeNorm = Vector2 ( *(localNorm.data()+1), *(localNorm.data()+2) );
 
         m_sumN2D     += w * planeNorm;
@@ -152,6 +152,7 @@ OrientedParabolicCylinderFitImpl<DataPoint, _WFunctor, T>::finalize () {
     if (! m_planeIsReady) {
 
         FIT_RESULT res = Base::finalize();
+        // Base::correct_orientation();
 
         if (res == STABLE) {
             m_planeIsReady = true;
@@ -170,8 +171,8 @@ void
 OrientedParabolicCylinderFitImpl<DataPoint, _WFunctor, T>::m_fitting_process () {
     
     m_ellipsoid_fitting();
-    Base::m_correctOrientation = 1;
     
+
     if (Base::m_isCylinder) {
         m_uq_parabolic_fitting();
         m_a_parabolic_fitting();
@@ -190,9 +191,9 @@ OrientedParabolicCylinderFitImpl<DataPoint, _WFunctor, T>::m_ellipsoid_fitting (
     Matrix2 C = weight * m_prodPN2D - m_sumP2D * m_sumN2D.transpose();
     C = C + C.transpose().eval();
 
-    Base::m_uq = Internal::solve_symmetric_sylvester(A, C);
+    Base::m_uq = - Internal::solve_symmetric_sylvester(A, C);
     Base::m_ul = invSumW * (m_sumN2D - Scalar(2) * Base::m_uq * m_sumP2D);
-    Base::m_uc = - invSumW * ( Base::m_ul.transpose() * m_sumP2D + (m_prodPP2D * Base::m_uq).trace() + m_sumH);
+    Base::m_uc = - invSumW * ( Base::m_ul.transpose() * m_sumP2D + (m_prodPP2D * Base::m_uq).trace() - m_sumH);
 
     Base::m_a = Scalar(1);
 }
@@ -259,7 +260,7 @@ OrientedParabolicCylinderFitImpl<DataPoint, _WFunctor, T>::m_uc_ul_parabolic_fit
 
     Scalar A = Base::m_ul.transpose() * m_sumP2D;
     Scalar B = Base::m_a * (m_prodPP2D * Base::m_uq).trace();
-    Base::m_uc = - invSumW * (A + B + m_sumH);
+    Base::m_uc = - invSumW * (A + B - m_sumH);
 }
 
 template < class DataPoint, class _WFunctor, typename T>

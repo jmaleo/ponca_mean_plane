@@ -95,8 +95,9 @@ public:
     PONCA_MULTIARCH inline void setCylinder(bool b) { m_isCylinder = b; }
 
     PONCA_MULTIARCH inline void correct_orientation() {
-        if (Base::primitiveGradient().dot(primitiveGradient()) < Scalar(0)) {
+        if (Base::m_sumN.dot(primitiveGradient()) < Scalar(0)) {
             m_correctOrientation = Scalar(-1);
+            std::cout << "Correcting orientation" << std::endl;
         }
         else {
             m_correctOrientation = Scalar(1);

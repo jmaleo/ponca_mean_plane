@@ -48,7 +48,7 @@ public:
         else {
             FIT_RESULT res = Base::finalize();
 
-            Eigen::SelfAdjointEigenSolver<Eigen::Matrix<Scalar, 2, 2>> eig( Base::m_correctOrientation * 2.0 * Base::m_a * Base::m_uq);
+            Eigen::SelfAdjointEigenSolver<Eigen::Matrix<Scalar, 2, 2>> eig( (-1) * 2.0 * Base::m_a * Base::m_uq);
             Eigen::Vector<Scalar, 2> values = eig.eigenvalues();
             Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic> eigenVec = eig.eigenvectors();
 

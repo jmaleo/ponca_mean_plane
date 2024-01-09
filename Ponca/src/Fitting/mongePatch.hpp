@@ -88,3 +88,55 @@ MongePatch<DataPoint, _WFunctor, T>::GaussianCurvature() const {
     return (h_uu()*h_vv() - pow(h_uv(),two)) /
         pow((one + pow(h_u(),two) + pow(h_v(),two) ), two);
 }
+
+template < class DataPoint, class _WFunctor, typename T>
+typename MongePatch<DataPoint, _WFunctor, T>::Scalar
+MongePatch<DataPoint, _WFunctor, T>::kmin() const {
+
+    Eigen::Matrix<Scalar, 2, 2> hess;
+    hess << h_uu(), h_uv(), h_uv(), h_vv();
+
+    Eigen::SelfAdjointEigenSolver<Eigen::Matrix<Scalar, 2, 2>> es(-hess);
+
+    return es.eigenvalues()(0);
+}
+
+template < class DataPoint, class _WFunctor, typename T>
+typename MongePatch<DataPoint, _WFunctor, T>::Scalar
+MongePatch<DataPoint, _WFunctor, T>::kmax() const {
+
+    Eigen::Matrix<Scalar, 2, 2> hess;
+    hess << h_uu(), h_uv(), h_uv(), h_vv();
+
+    Eigen::SelfAdjointEigenSolver<Eigen::Matrix<Scalar, 2, 2>> es(-hess);
+
+    return es.eigenvalues()(1);
+}
+
+template < class DataPoint, class _WFunctor, typename T>
+typename MongePatch<DataPoint, _WFunctor, T>::VectorType
+MongePatch<DataPoint, _WFunctor, T>::kminDirection() const {
+
+    Eigen::Matrix<Scalar, 2, 2> hess;
+    hess << h_uu(), h_uv(), h_uv(), h_vv();
+    Eigen::SelfAdjointEigenSolver<Eigen::Matrix<Scalar, 2, 2>> es(-hess);
+    Eigen::Vector<Scalar, 2> dir = es.eigenvectors().col(0);
+
+    VectorType v1 = VectorType(0, dir(0), dir(1));
+    return Base::template localFrameToWorld<true>(v1);
+}
+
+template < class DataPoint, class _WFunctor, typename T>
+typename MongePatch<DataPoint, _WFunctor, T>::VectorType
+MongePatch<DataPoint, _WFunctor, T>::kmaxDirection() const {
+
+    Eigen::Matrix<Scalar, 2, 2> hess;
+    hess << h_uu(), h_uv(), h_uv(), h_vv();
+
+    Eigen::SelfAdjointEigenSolver<Eigen::Matrix<Scalar, 2, 2>> es(-hess);
+
+    Eigen::Vector<Scalar, 2> dir = es.eigenvectors().col(1);
+
+    VectorType v2 = VectorType(0, dir(0), dir(1));
+    return Base::template localFrameToWorld<true>(v2);
+}

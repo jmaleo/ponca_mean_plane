@@ -51,6 +51,18 @@ public:
     //! \brief Returns an estimate of the Gaussian curvature
     PONCA_MULTIARCH inline Scalar GaussianCurvature() const;
 
+    //! \brief Returns an estimate of the minimum curvature
+    PONCA_MULTIARCH inline Scalar kmin() const;
+
+    //! \brief Returns an estimate of the maximum curvature
+    PONCA_MULTIARCH inline Scalar kmax() const;
+
+    //! \brief Returns an estimate of the minimum curvature direction $
+    PONCA_MULTIARCH inline VectorType kminDirection() const;
+
+    //! \brief Returns an estimate of the maximum curvature direction
+    PONCA_MULTIARCH inline VectorType kmaxDirection() const;
+
     PONCA_MULTIARCH inline Scalar evalUV(Scalar u, Scalar v) const {
       return h_uu()*u*u + h_vv()*v*v + h_uv()*u*v + h_u()*u + h_v()*v + h_c();
     }
@@ -88,6 +100,17 @@ template < class DataPoint, class _WFunctor, typename T>
                                             Ponca::LocalFrame<DataPoint, _WFunctor,
                                                 Ponca::Plane<DataPoint, _WFunctor,T>>>>>>;
 //! [MongePatchFit Definition]
+
+/// \brief Helper alias for Oriented MongePatch fitting on 3D points using oriented MongePatch
+//! [OrientedMongePatchFit Definition]
+template < class DataPoint, class _WFunctor, typename T>
+    using OrientedMongePatchFit = Ponca::MongePatch<DataPoint, _WFunctor,
+                                    Ponca::MeanPlaneFitImpl<DataPoint, _WFunctor,
+                                            Ponca::MeanNormal<DataPoint, _WFunctor,
+                                                Ponca::MeanPosition<DataPoint, _WFunctor,
+                                                    Ponca::LocalFrame<DataPoint, _WFunctor,
+                                                        Ponca::Plane<DataPoint, _WFunctor,T>>>>>>;
+//! [OrientedMongePatchFit Definition]
 
 #include "mongePatch.hpp"
 

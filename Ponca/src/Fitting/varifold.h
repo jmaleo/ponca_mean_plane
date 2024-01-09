@@ -186,7 +186,7 @@ public:
     PONCA_MULTIARCH inline Scalar kmin () const { return m_k1; }
     PONCA_MULTIARCH inline Scalar kmax () const { return m_k2; }
     PONCA_MULTIARCH inline Scalar kMean () const { return (m_k1 + m_k2)/2; }
-    
+    PONCA_MULTIARCH inline Scalar kGaussianCurvature () const { return m_k1 * m_k2; }
     
     PONCA_MULTIARCH inline VectorType kminDirection() const { return m_dir1; }
     PONCA_MULTIARCH inline VectorType kmaxDirection() const { return m_dir2; }

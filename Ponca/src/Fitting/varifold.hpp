@@ -274,9 +274,6 @@ FIT_RESULT Varifold<DataPoint, _WFunctor, T>::finalize()
         //     return Base::m_eCurrentState;
         constexpr Scalar epsilon = Eigen::NumTraits<Scalar>::dummy_precision();
 
-        std::cout << "Sum weight : " << m_sumWeight << std::endl;
-        std::cout << "m_n_l0 x:" << m_n_l0.x() << " y:" << m_n_l0.y() << " z:" << m_n_l0.z() << std::endl;
-
         Scalar sum_weight = Base::getWeightSum();
 
         if(std::abs(sum_weight) < epsilon)

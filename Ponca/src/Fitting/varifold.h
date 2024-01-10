@@ -175,6 +175,7 @@ public:
     PONCA_FITTING_DECLARE_FINALIZE
 
     PONCA_MULTIARCH inline Scalar f_smooth  (const Scalar& _x) const { Scalar v = _x*_x - Scalar(1.); return v*v; }
+    // PONCA_MULTIARCH inline Scalar f_smooth  (const Scalar& _x) const { Scalar v = Scalar(1); return v; }
 
     // plane
     VectorType project(const VectorType& p) const;
@@ -186,6 +187,7 @@ public:
     PONCA_MULTIARCH inline Scalar kmin () const { return m_k1; }
     PONCA_MULTIARCH inline Scalar kmax () const { return m_k2; }
     PONCA_MULTIARCH inline Scalar kMean () const { return (m_k1 + m_k2)/2; }
+    PONCA_MULTIARCH inline Scalar GaussianCurvature () const { return m_k1 * m_k2; }
     
     
     PONCA_MULTIARCH inline VectorType kminDirection() const { return m_dir1; }

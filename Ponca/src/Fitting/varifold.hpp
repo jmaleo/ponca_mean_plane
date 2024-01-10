@@ -274,6 +274,9 @@ FIT_RESULT Varifold<DataPoint, _WFunctor, T>::finalize()
         //     return Base::m_eCurrentState;
         constexpr Scalar epsilon = Eigen::NumTraits<Scalar>::dummy_precision();
 
+        std::cout << "Sum weight : " << m_sumWeight << std::endl;
+        std::cout << "m_n_l0 x:" << m_n_l0.x() << " y:" << m_n_l0.y() << " z:" << m_n_l0.z() << std::endl;
+
         Scalar sum_weight = Base::getWeightSum();
 
         if(std::abs(sum_weight) < epsilon)
@@ -327,7 +330,11 @@ typename Varifold<DataPoint, _WFunctor, T>::Mat32 Varifold<DataPoint, _WFunctor,
 template<class DataPoint, class _WFunctor, typename T>
 typename Varifold<DataPoint, _WFunctor, T>::VectorType Varifold<DataPoint, _WFunctor, T>::project(const VectorType& p) const
 {
-    return Base::m_w.basisCenter() + (p - (p - Base::m_w.basisCenter()).dot(m_n_l0) * m_n_l0);
+    MatrixType B;
+    Mat32 Q = tangentPlane();
+    B << m_n_l0, Q.col(0), Q.col(1);
+    return p + B.transpose() * (p - Base::m_w.basisCenter());
+    // return Base::m_w.basisCenter() + (p - (p - Base::m_w.basisCenter()).dot(m_n_l0) * m_n_l0); // OLD
 }
 
 template<class DataPoint, class _WFunctor, typename T>

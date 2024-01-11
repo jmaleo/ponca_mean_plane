@@ -201,6 +201,7 @@ void Varifold<DataPoint, _WFunctor, T>::init(
 {
     Base::init(_evalPos);
     m_sumN = VectorType::Zero();
+    m_sumP = VectorType::Zero();
     m_sumWeight = Scalar(0);
 
     m_n_l0 = VectorType::Zero();
@@ -219,7 +220,7 @@ template<class DataPoint, class _WFunctor, typename T>
 bool Varifold<DataPoint, _WFunctor, T>::addLocalNeighbor(
     Scalar w, const VectorType &localQ, const DataPoint &attributes)
 {
-    // auto res = Base::addLocalNeighbor(w, localQ, attributes);
+    auto res = Base::addLocalNeighbor(w, localQ, attributes);
     if (! m_planeIsReady)
     {
         VectorType baryCenter = Base::m_w.basisCenter();
@@ -229,6 +230,7 @@ bool Varifold<DataPoint, _WFunctor, T>::addLocalNeighbor(
         Scalar val = f_smooth(dist / Base::m_w.evalScale());
 
         m_sumN += val * attributes.normal();
+        m_sumP += val * attributes.pos();
         m_sumWeight += val;
 
         return true;
@@ -265,17 +267,15 @@ FIT_RESULT Varifold<DataPoint, _WFunctor, T>::finalize()
     if ( ! m_planeIsReady ){
         m_planeIsReady = true;
         m_n_l0 = m_sumN / m_sumWeight;
+        m_sumP /= m_sumWeight;
         m_P_l0 = MatrixType::Identity() - m_n_l0 * m_n_l0.transpose();
         return Base::m_eCurrentState = NEED_OTHER_PASS;
     }
     else {
 
-        // if(Base::finalize() != STABLE)
-        //     return Base::m_eCurrentState;
+        if(Base::finalize() != STABLE)
+            return Base::m_eCurrentState;
         constexpr Scalar epsilon = Eigen::NumTraits<Scalar>::dummy_precision();
-
-        std::cout << "Sum weight : " << m_sumWeight << std::endl;
-        std::cout << "m_n_l0 x:" << m_n_l0.x() << " y:" << m_n_l0.y() << " z:" << m_n_l0.z() << std::endl;
 
         Scalar sum_weight = Base::getWeightSum();
 
@@ -293,9 +293,9 @@ FIT_RESULT Varifold<DataPoint, _WFunctor, T>::finalize()
         if(solver.info() != Eigen::Success)
             return UNSTABLE;
 
-        m_k1 = solver.eigenvalues()[0];
+        m_k1 = solver.eigenvalues()[0] / ( Scalar( 1.0 / 3.0 ) * ( Base::m_w.evalScale()));
         m_dir1 = Q * solver.eigenvectors().col(0);
-        m_k2 = solver.eigenvalues()[1];
+        m_k2 = solver.eigenvalues()[1] / ( Scalar( 1.0 / 3.0 ) * ( Base::m_w.evalScale()));
         m_dir2 = Q * solver.eigenvectors().col(1);
 
         if (m_k1 > m_k2)
@@ -324,17 +324,14 @@ typename Varifold<DataPoint, _WFunctor, T>::Mat32 Varifold<DataPoint, _WFunctor,
 
     B.col(0).normalize();
     B.col(1) = B.col(0).cross(n);
+
     return B;
 }
 
 template<class DataPoint, class _WFunctor, typename T>
 typename Varifold<DataPoint, _WFunctor, T>::VectorType Varifold<DataPoint, _WFunctor, T>::project(const VectorType& p) const
 {
-    MatrixType B;
-    Mat32 Q = tangentPlane();
-    B << m_n_l0, Q.col(0), Q.col(1);
-    return p + B.transpose() * (p - Base::m_w.basisCenter());
-    // return Base::m_w.basisCenter() + (p - (p - Base::m_w.basisCenter()).dot(m_n_l0) * m_n_l0); // OLD
+    return p - (p - m_sumP).dot(m_n_l0) * m_n_l0;
 }
 
 template<class DataPoint, class _WFunctor, typename T>

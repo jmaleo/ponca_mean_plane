@@ -161,6 +161,7 @@ public:
     // plane
     bool m_planeIsReady = false;
     VectorType m_sumN; // sum of normals
+    VectorType m_sumP; // sum of points
     Scalar     m_sumWeight; // sum of weights
 
 

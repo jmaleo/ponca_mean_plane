@@ -152,7 +152,8 @@ public:
     MatrixType m_P_l0;
 
     // accumulation
-    MatrixType m_A;
+    MatrixType m_nume;
+    Scalar m_deno;
 
     // results
     Scalar m_k1, m_k2;
@@ -160,8 +161,8 @@ public:
 
     // plane
     bool m_planeIsReady = false;
-    VectorType m_sumN; // sum of normals
-    VectorType m_sumP; // sum of points
+    VectorType m_sumN;      // sum of normals
+    VectorType m_sumP;      // sum of points
     Scalar     m_sumWeight; // sum of weights
 
 

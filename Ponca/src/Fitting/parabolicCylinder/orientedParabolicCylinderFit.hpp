@@ -138,7 +138,7 @@ OrientedParabolicCylinderFitImpl<DataPoint, _WFunctor, T>::addLocalNeighbor(Scal
         m_sumDotPP2D += w * planePos.squaredNorm();
         m_prodPP2D   += w * planePos * planePos.transpose();
         m_prodPN2D   += w * planePos * planeNorm.transpose();
-        m_sumH       += w * *(localPos.data());
+        m_sumH       -= Base::m_correctOrientation * w * *(localPos.data());
 
         return true;
     }
@@ -152,10 +152,10 @@ OrientedParabolicCylinderFitImpl<DataPoint, _WFunctor, T>::finalize () {
     if (! m_planeIsReady) {
 
         FIT_RESULT res = Base::finalize();
-        // Base::correct_orientation();
 
         if (res == STABLE) {
             m_planeIsReady = true;
+            Base::correct_orientation();
             return Base::m_eCurrentState = NEED_OTHER_PASS;
         }
         return res;
@@ -172,7 +172,6 @@ OrientedParabolicCylinderFitImpl<DataPoint, _WFunctor, T>::m_fitting_process () 
     
     m_ellipsoid_fitting();
     
-
     if (Base::m_isCylinder) {
         m_uq_parabolic_fitting();
         m_a_parabolic_fitting();
@@ -191,7 +190,7 @@ OrientedParabolicCylinderFitImpl<DataPoint, _WFunctor, T>::m_ellipsoid_fitting (
     Matrix2 C = weight * m_prodPN2D - m_sumP2D * m_sumN2D.transpose();
     C = C + C.transpose().eval();
 
-    Base::m_uq = - Internal::solve_symmetric_sylvester(A, C);
+    Base::m_uq = Internal::solve_symmetric_sylvester(A, C);
     Base::m_ul = invSumW * (m_sumN2D - Scalar(2) * Base::m_uq * m_sumP2D);
     Base::m_uc = - invSumW * ( Base::m_ul.transpose() * m_sumP2D + (m_prodPP2D * Base::m_uq).trace() - m_sumH);
 

@@ -47,7 +47,7 @@ bool Varifold<DataPoint, _WFunctor, T>::addLocalNeighbor(
     constexpr Scalar n = 3.0;
 
     const Scalar rho_prime = rho_der((x_l - x_l0).norm() / t);
-    const Scalar xi = - t * rho_prime / 3;
+    const Scalar xi = - ((x_l - x_l0).norm() / t) * rho_prime / 3;
 
     const Scalar coeff = d/n 
         * m_l
@@ -187,12 +187,15 @@ void Varifold<DataPoint, _WFunctor, T>::init(
     m_n_l0 = n_l0;
     m_P_l0 = MatrixType::Identity() - n_l0 * n_l0.transpose();
 
-    m_A = MatrixType::Zero();
+    m_nume = MatrixType::Zero();
+    m_deno = Scalar(0);
 
     m_k1 = Scalar(0);
     m_dir1 = VectorType::Zero();
     m_k2 = Scalar(0);
     m_dir2 = VectorType::Zero();
+
+    m_planeIsReady = true;
 }
 
 template<class DataPoint, class _WFunctor, typename T>
@@ -206,7 +209,8 @@ void Varifold<DataPoint, _WFunctor, T>::init(
 
     m_n_l0 = VectorType::Zero();
 
-    m_A = MatrixType::Zero();
+    m_nume = MatrixType::Zero();
+    m_deno = Scalar(0);
 
     m_k1 = Scalar(0);
     m_dir1 = VectorType::Zero();
@@ -244,7 +248,8 @@ bool Varifold<DataPoint, _WFunctor, T>::addLocalNeighbor(
 
         const VectorType n_l = attributes.normal();
         const MatrixType P_l = MatrixType::Identity() - n_l * n_l.transpose();
-        const VectorType delta_x = - localQ.normalized();
+        const Scalar d_l = localQ.norm();
+        const VectorType delta_x = localQ / d_l; // = localQ.normalized()
         const VectorType u = P_l * delta_x;
         const MatrixType DeltaP = P_l - m_P_l0;
         const VectorType Pl_nl0 = P_l * m_n_l0;
@@ -252,9 +257,10 @@ bool Varifold<DataPoint, _WFunctor, T>::addLocalNeighbor(
         const MatrixType a1 = u * Pl_nl0.transpose();
         const MatrixType a2 = u.dot(m_n_l0) * DeltaP;
 
-        w *= -1; // see WARNING in VarifoldWeightKernel::f()
+        w *= -1; // see WARNING in VarifoldWeightKernel::f() (nor necessary because of the ratio nume/deno)
 
-        m_A += w * (a1 + a1.transpose() - a2);
+        m_nume += w * (a1 + a1.transpose() - a2);
+        m_deno += w * d_l;
     }
     
     return true;
@@ -279,13 +285,13 @@ FIT_RESULT Varifold<DataPoint, _WFunctor, T>::finalize()
 
         Scalar sum_weight = Base::getWeightSum();
 
-        if(std::abs(sum_weight) < epsilon)
+        if(std::abs(m_deno) < epsilon)
             return UNSTABLE;
 
-        m_A /= sum_weight;
+        const MatrixType A = m_nume / m_deno * Base::m_w.evalScale(); /* const MatrixType A = m_nume / m_deno * Base::m_w.evalScale(); */  
 
         const Mat32 Q = tangentPlane();
-        const Mat22 B = - Q.transpose() * m_A * Q; // minus for sign convention
+        const Mat22 B = - Q.transpose() * A * Q; // minus for sign convention
 
         Eigen::SelfAdjointEigenSolver<Mat22> solver;
         solver.computeDirect(B);
@@ -293,9 +299,9 @@ FIT_RESULT Varifold<DataPoint, _WFunctor, T>::finalize()
         if(solver.info() != Eigen::Success)
             return UNSTABLE;
 
-        m_k1 = solver.eigenvalues()[0] / ( Scalar( 1.0 / 3.0 ) * ( Base::m_w.evalScale()));
+        m_k1 = solver.eigenvalues()[0] / Base::m_w.evalScale();
         m_dir1 = Q * solver.eigenvectors().col(0);
-        m_k2 = solver.eigenvalues()[1] / ( Scalar( 1.0 / 3.0 ) * ( Base::m_w.evalScale()));
+        m_k2 = solver.eigenvalues()[1] / Base::m_w.evalScale();
         m_dir2 = Q * solver.eigenvectors().col(1);
 
         if (m_k1 > m_k2)

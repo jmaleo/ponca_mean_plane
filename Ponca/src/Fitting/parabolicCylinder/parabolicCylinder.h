@@ -88,7 +88,7 @@ public:
         Scalar first = m_uc + m_ul.transpose() * q;
         Scalar second = q.transpose() * m_uq * q;
 
-        return first + m_a * second ;
+        return m_correctOrientation * ( first + m_a * second ) ;
     }
 
     //! \brief Make the primitive fitting to be a demi-ellipsoid instead of a parabolic cylinder

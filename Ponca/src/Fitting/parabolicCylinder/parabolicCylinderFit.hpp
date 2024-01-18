@@ -39,7 +39,7 @@ ParabolicCylinderFitImpl<DataPoint, _WFunctor, T>::addLocalNeighbor(Scalar w,
         Eigen::Vector<Scalar, 7> v {1, x, y , xx, xy, xy, yy};
 
         m_A_cov += w * v * v.transpose();
-        m_F_cov += w * v * f;
+        m_F_cov +=  w * v * f;
 
         return true;
     }
@@ -73,8 +73,11 @@ ParabolicCylinderFitImpl<DataPoint, _WFunctor, T>::m_fitting_process () {
     
     m_ellipsoid_fitting();
 
-    Base::correct_orientation();
+    // Way to fix an issue with the principal curvatures computation for ellipsoid 2D.
+    Base::m_a = Scalar(-1);
 
+    // Reorient the plane if mean plane is provided. 
+    Base::correct_orientation();
 
     if (Base::m_isCylinder) {
         m_uq_parabolic_fitting();

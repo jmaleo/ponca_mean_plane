@@ -240,7 +240,7 @@ bool Varifold<DataPoint, _WFunctor, T>::addLocalNeighbor(
         return true;
     }
     else {
-        if(not res)
+        if(not Base::addLocalNeighbor(w, localQ, attributes))
             return false;
 
         if(localQ.squaredNorm() < Eigen::NumTraits<Scalar>::dummy_precision())

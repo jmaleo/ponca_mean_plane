@@ -72,7 +72,9 @@ void
 ParabolicCylinderFitImpl<DataPoint, _WFunctor, T>::m_fitting_process () {
     
     m_ellipsoid_fitting();
-    Base::m_correctOrientation = -1;
+
+    Base::correct_orientation();
+
 
     if (Base::m_isCylinder) {
         m_uq_parabolic_fitting();

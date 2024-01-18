@@ -59,6 +59,19 @@ private:
 
     PONCA_MULTIARCH inline void    m_compute_curvature       ();
 
+    PONCA_MULTIARCH inline void    correct_orientation       (){
+        // Check the angle between Base::m_sumN and Base::primitiveGradient()
+        // If the angle is > 135°, we need to correct the orientation of the primitive
+        VectorType n = Base::m_sumN;
+        VectorType nGrad = Base::primitiveGradient();
+        Scalar angle = std::acos(n.dot(nGrad) / (n.norm() * nGrad.norm()));
+        // if (angle > Scalar(3.0) * M_PI/Scalar(4.0)) {
+        if (angle > M_PI_2) {
+            std::cout << "angle = " << angle << std::endl;
+            Base::m_correctOrientation = Scalar(-1);
+        }
+    }
+
 
 }; //class OrientedParabolicCylinderFitImpl
 

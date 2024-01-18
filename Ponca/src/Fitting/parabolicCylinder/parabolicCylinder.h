@@ -95,12 +95,14 @@ public:
     PONCA_MULTIARCH inline void setCylinder(bool b) { m_isCylinder = b; }
 
     PONCA_MULTIARCH inline void correct_orientation() {
-        if (Base::m_sumN.dot(primitiveGradient()) < Scalar(0)) {
+        // Check the angle between Base::primitiveGradient() and Base::primitiveGradient()
+        // If the angle is > 135°, we need to correct the orientation of the primitive
+        VectorType n = Base::primitiveGradient();
+        VectorType nGrad = primitiveGradient();
+        Scalar angle = std::acos(n.dot(nGrad) / (n.norm() * nGrad.norm()));
+        // if (angle > Scalar(3.0) * M_PI/Scalar(4.0)) {
+        if (angle > M_PI_2) {
             m_correctOrientation = Scalar(-1);
-            std::cout << "Correcting orientation" << std::endl;
-        }
-        else {
-            m_correctOrientation = Scalar(1);
         }
     }
 

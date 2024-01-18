@@ -129,7 +129,7 @@ OrientedParabolicCylinderFitImpl<DataPoint, _WFunctor, T>::addLocalNeighbor(Scal
         VectorType localPos = Base::worldToLocalFrame(attributes.pos());
         Vector2 planePos = Vector2 ( *(localPos.data()+1), *(localPos.data()+2) );
 
-        VectorType localNorm = Base::m_correctOrientation * Base::template worldToLocalFrame<true>(attributes.normal());
+        VectorType localNorm = Base::template worldToLocalFrame<true>(attributes.normal());
         Vector2 planeNorm = Vector2 ( *(localNorm.data()+1), *(localNorm.data()+2) );
 
         m_sumN2D     += w * planeNorm;
@@ -138,7 +138,7 @@ OrientedParabolicCylinderFitImpl<DataPoint, _WFunctor, T>::addLocalNeighbor(Scal
         m_sumDotPP2D += w * planePos.squaredNorm();
         m_prodPP2D   += w * planePos * planePos.transpose();
         m_prodPN2D   += w * planePos * planeNorm.transpose();
-        m_sumH       -= Base::m_correctOrientation * w * *(localPos.data());
+        m_sumH       += w * *(localPos.data());
 
         return true;
     }
@@ -155,7 +155,6 @@ OrientedParabolicCylinderFitImpl<DataPoint, _WFunctor, T>::finalize () {
 
         if (res == STABLE) {
             m_planeIsReady = true;
-            Base::correct_orientation();
             return Base::m_eCurrentState = NEED_OTHER_PASS;
         }
         return res;
@@ -171,6 +170,8 @@ void
 OrientedParabolicCylinderFitImpl<DataPoint, _WFunctor, T>::m_fitting_process () {
     
     m_ellipsoid_fitting();
+
+    correct_orientation();
     
     if (Base::m_isCylinder) {
         m_uq_parabolic_fitting();

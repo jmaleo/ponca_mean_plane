@@ -67,7 +67,6 @@ private:
         Scalar angle = std::acos(n.dot(nGrad) / (n.norm() * nGrad.norm()));
         // if (angle > Scalar(3.0) * M_PI/Scalar(4.0)) {
         if (angle > M_PI_2) {
-            std::cout << "angle = " << angle << std::endl;
             Base::m_correctOrientation = Scalar(-1);
         }
     }

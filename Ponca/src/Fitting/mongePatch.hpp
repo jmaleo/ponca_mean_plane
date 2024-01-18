@@ -19,9 +19,10 @@ MongePatch<DataPoint, _WFunctor, T>::addLocalNeighbor(Scalar w,
                                                       const VectorType &localQ,
                                                       const DataPoint &attributes)
 {
+    auto res = Base::addLocalNeighbor(w, localQ, attributes);
     if(! m_planeIsReady)
     {
-        return Base::addLocalNeighbor(w, localQ, attributes);
+        return res;
     }
     else // base plane is ready, we can now fit the patch
     {

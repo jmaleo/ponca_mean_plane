@@ -110,7 +110,7 @@ public:
     PONCA_MULTIARCH inline Scalar potential (const VectorType& _q) const;
 
     /*! \brief Value of the scalar field at the evaluation point */
-    PONCA_MULTIARCH inline Scalar potential() const { potential(Base::m_w.basisCenter()); }
+    PONCA_MULTIARCH inline Scalar potential() const { return potential(Base::m_w.basisCenter()); }
 
     //! \brief Project a point on the ellipsoid
     PONCA_MULTIARCH inline VectorType project (const VectorType& _q) const;

@@ -3,7 +3,7 @@ typename ParabolicCylinder<DataPoint, _WFunctor, T>::Scalar
 ParabolicCylinder<DataPoint, _WFunctor, T>::potential( const VectorType &_q ) const
 {
     VectorType x = Base::worldToLocalFrame(_q);
-    return eval_quadratic_function(*(x.data() +1 ), *(x.data() + 2));
+    return m_correctOrientation * eval_quadratic_function(*(x.data() +1 ), *(x.data() + 2)) - *(x.data());
 }
 
 

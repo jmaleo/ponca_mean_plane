@@ -68,6 +68,12 @@ public:
     }
 
     /*! \brief Value of the scalar field at the evaluation point */
+    PONCA_MULTIARCH inline Scalar potential() const {
+      VectorType x = Base::worldToLocalFrame(Base::m_w.basisCenter());
+      return evalUV(*(x.data()+1),*(x.data()+2)) - *(x.data());
+    }
+
+    /*! \brief Value of the scalar field at the evaluation point */
     PONCA_MULTIARCH inline Scalar potential(const VectorType& _q) const {
       VectorType x = Base::worldToLocalFrame(_q);
       return evalUV(*(x.data()+1),*(x.data()+2)) - *(x.data());

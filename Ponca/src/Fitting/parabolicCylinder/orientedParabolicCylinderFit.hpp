@@ -169,8 +169,8 @@ template < class DataPoint, class _WFunctor, typename T>
 void
 OrientedParabolicCylinderFitImpl<DataPoint, _WFunctor, T>::m_fitting_process () {
     
-    m_ellipsoid_fitting();
 
+    m_ellipsoid_fitting();
     correct_orientation();
     
     if (Base::m_isCylinder) {
@@ -179,6 +179,7 @@ OrientedParabolicCylinderFitImpl<DataPoint, _WFunctor, T>::m_fitting_process () 
         m_uc_ul_parabolic_fitting();
         m_compute_curvature();
     }
+    
 }
 
 template < class DataPoint, class _WFunctor, typename T>
@@ -191,7 +192,7 @@ OrientedParabolicCylinderFitImpl<DataPoint, _WFunctor, T>::m_ellipsoid_fitting (
     Matrix2 C = weight * m_prodPN2D - m_sumP2D * m_sumN2D.transpose();
     C = C + C.transpose().eval();
 
-    Base::m_uq = Internal::solve_symmetric_sylvester(A, C);
+    Base::m_uq = - Internal::solve_symmetric_sylvester(A, C);
     Base::m_ul = invSumW * (m_sumN2D - Scalar(2) * Base::m_uq * m_sumP2D);
     Base::m_uc = - invSumW * ( Base::m_ul.transpose() * m_sumP2D + (m_prodPP2D * Base::m_uq).trace() - m_sumH);
 

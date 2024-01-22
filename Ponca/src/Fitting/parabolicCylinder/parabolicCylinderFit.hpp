@@ -74,7 +74,7 @@ ParabolicCylinderFitImpl<DataPoint, _WFunctor, T>::m_fitting_process () {
     m_ellipsoid_fitting();
 
     // Way to fix an issue with the principal curvatures computation for ellipsoid 2D.
-    Base::m_a = Scalar(-1);
+    // Base::m_a = Scalar(-1);
 
     // Reorient the plane if mean plane is provided. 
     Base::correct_orientation();

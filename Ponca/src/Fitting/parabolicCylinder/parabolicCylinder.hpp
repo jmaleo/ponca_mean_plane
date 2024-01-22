@@ -15,6 +15,7 @@ ParabolicCylinder<DataPoint, _WFunctor, T>::project( const VectorType& _q ) cons
     constexpr Scalar epsilon = Eigen::NumTraits<Scalar>::dummy_precision();
     VectorType x = Base::worldToLocalFrame(_q);
     x(0) = m_correctOrientation * eval_quadratic_function(x(1), x(2));
+    // x(0) *= Scalar(-1.0);
     return Base::localFrameToWorld(x);
 }
 

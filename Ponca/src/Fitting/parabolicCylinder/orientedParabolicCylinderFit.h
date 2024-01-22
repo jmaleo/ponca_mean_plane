@@ -60,15 +60,13 @@ private:
     PONCA_MULTIARCH inline void    m_compute_curvature       ();
 
     PONCA_MULTIARCH inline void    correct_orientation       (){
-        // Check the angle between Base::m_sumN and Base::primitiveGradient()
-        // If the angle is > 135°, we need to correct the orientation of the primitive
-        VectorType n = Base::m_sumN;
-        VectorType nGrad = Base::primitiveGradient();
-        Scalar angle = std::acos(n.dot(nGrad) / (n.norm() * nGrad.norm()));
-        // if (angle > Scalar(3.0) * M_PI/Scalar(4.0)) {
-        if (angle > M_PI_2) {
+
+        VectorType n2D = VectorType(1, m_sumN2D(0), m_sumN2D(1));
+        VectorType n_sum = Base::template localFrameToWorld<true>(n2D);
+        if (Base::m_sumN.dot(n_sum) < 0) {
             Base::m_correctOrientation = Scalar(-1);
         }
+
     }
 
 

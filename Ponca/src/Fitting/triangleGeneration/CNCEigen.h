@@ -290,7 +290,7 @@ public:
   /// @param N the normal vector
   /// @return a pair of principal directions.
   static
-  std::tuple< Scalar, Scalar, Eigen::Vector<Scalar, 3>, Eigen::Vector<Scalar, 3> >
+  std::tuple< Scalar, Scalar, Eigen::Vector<Scalar, 3>, Eigen::Vector<Scalar, 3>, Eigen::Vector<Scalar, 3> >
   curvaturesFromTensor( const Eigen::Matrix<Scalar, 3, 3> &tensor,
 			const Scalar           area,
 			const Eigen::Vector<Scalar, 3> &N )
@@ -314,15 +314,16 @@ public:
 	assert(eigensolver.eigenvalues()(1) <= eigensolver.eigenvalues()(2) );    
 	Eigen::Vector<Scalar, 3> v1 = eigensolver.eigenvectors().col(0);
 	Eigen::Vector<Scalar, 3> v2 = eigensolver.eigenvectors().col(1);
+  Eigen::Vector<Scalar, 3> normal = eigensolver.eigenvectors().col(2);
 	return std::make_tuple( -eigensolver.eigenvalues()(0),
 				-eigensolver.eigenvalues()(1),
-				v1,v2 );
+				v1,v2,normal );
       }
     else
       {
 	std::cerr << "Incorrect diagonalization for tensor " << M << std::endl;
-	Eigen::Vector<Scalar, 3> v1, v2;
-	return std::make_tuple( 0.0, 0.0, v1,v2 );
+	Eigen::Vector<Scalar, 3> v1, v2, normal;
+	return std::make_tuple( 0.0, 0.0, v1,v2,normal );
       }
   }
 

@@ -127,6 +127,7 @@ protected:
 
     VectorType v1;
     VectorType v2;
+    VectorType normal;
 
 
     // Hexagram
@@ -157,6 +158,7 @@ public:
 
         v1 = VectorType::Zero();
         v2 = VectorType::Zero();
+        normal = VectorType::Zero();
 
         _nb_vt = 0;
 
@@ -221,9 +223,12 @@ public:
 
     PONCA_MULTIARCH inline VectorType kmaxDirection() { return v2; }
 
+    PONCA_MULTIARCH inline VectorType primitiveGradient() { return normal; }
+
     PONCA_MULTIARCH inline Scalar kMean() { return _H; }
 
     PONCA_MULTIARCH inline Scalar GaussianCurvature() { return _G; }
+
 
 private: 
 

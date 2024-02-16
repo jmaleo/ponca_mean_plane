@@ -105,7 +105,9 @@ TriangleGeneration<DataPoint, _WFunctor, T>::finalize () {
         _G = Scalar(0);
     }
 
-    std::tie (k2, k1, v2, v1) = CNCEigen_s::curvaturesFromTensor(_T, 1.0, _normale);
+    std::tie (k2, k1, v2, v1, normal) = CNCEigen_s::curvaturesFromTensor(_T, 1.0, _normale);
+    // reorient the normal
+    if (normal.dot(_normale) < 0) normal *= -1;
 
     if (k1 > k2) {
         std::swap(k1, k2);

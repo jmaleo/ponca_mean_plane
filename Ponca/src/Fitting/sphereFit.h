@@ -74,6 +74,7 @@ protected:
     MatrixA  m_matA {MatrixA::Zero()};  /*!< \brief Covariance matrix of [1, p, p^2] */
 
     Solver m_solver;
+    int m_minId;
 
 public:
     PONCA_EXPLICIT_CAST_OPERATORS(SphereFitImpl,sphereFit)
@@ -90,6 +91,49 @@ using SphereFit =
         AlgebraicSphere<DataPoint, _WFunctor,T>>;
 
 
+template < class DataPoint, class _WFunctor, int DiffType, typename T>
+class SphereFitDerImpl : public T
+{
+protected:
+    PONCA_FITTING_DECLARE_DEFAULT_TYPES
+    PONCA_FITTING_DECLARE_DEFAULT_DER_TYPES
+
+    using VectorA = typename Base::VectorA;
+    using MatrixA = typename Base::MatrixA;
+
+protected:
+    enum
+    {
+        Check = Base::PROVIDES_ALGEBRAIC_SPHERE &
+                Base::PROVIDES_PRIMITIVE_DERIVATIVE,
+        PROVIDES_ALGEBRAIC_SPHERE_DERIVATIVE,
+        PROVIDES_NORMAL_DERIVATIVE
+    };
+
+protected:
+    // computation data
+    MatrixA m_dmatA[Base::NbDerivatives];
+    // ScalarArray m_dSumDotPP;
+
+public:
+    // results
+    ScalarArray m_dUc;
+    VectorArray m_dUl;
+    ScalarArray m_dUq;
+
+public:
+    PONCA_EXPLICIT_CAST_OPERATORS_DER(SphereFitDerImpl,SphereFitDer)
+    PONCA_FITTING_DECLARE_INIT_ADDDER_FINALIZE
+
+    PONCA_MULTIARCH inline ScalarArray dPotential() const;
+    PONCA_MULTIARCH inline VectorArray dNormal() const;
+
+}; //class SphereFitDerImpl
+
+
+template < class DataPoint, class _WFunctor, int DiffType, typename T>
+using SphereFitDer =
+    SphereFitDerImpl<DataPoint, _WFunctor, DiffType, T>;
 
 #include "sphereFit.hpp"
 

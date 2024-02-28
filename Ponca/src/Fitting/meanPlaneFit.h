@@ -124,12 +124,12 @@ public:
             VectorType normal = Base::primitiveGradient();
             m_dNormal = Base::m_dSumN / Base::getWeightSum();
 
-            for (int k = 0; k < DataPoint::Dim; ++k){
-                VectorType dDiff = dBarycenter.col(k);
-                if (k > 0 || !Base::isScaleDer())
-                    dDiff(Base::isScaleDer() ? k - 1 : k) += 1;
-                m_dDist(k) = m_dNormal.col(k).dot(barycenter) + normal.dot(dDiff);
-            }
+            // for (int k = 0; k < DataPoint::Dim; ++k){
+            //     VectorType dDiff = dBarycenter.col(k);
+            //     if (k > 0 || !Base::isScaleDer())
+            //         dDiff(Base::isScaleDer() ? k - 1 : k) += 1;
+            //     m_dDist(k) = m_dNormal.col(k).dot(barycenter) + normal.dot(dDiff);
+            // }
             
             // \fixme we shouldn't need this normalization, however currently the derivatives are overestimated by a factor 2
             // m_dNormal /= Scalar(2.);

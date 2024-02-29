@@ -160,11 +160,12 @@ UnorientedSphereDerImpl<DataPoint, _WFunctor, DiffType, T>::finalize()
         {
             MatrixBB dQ;
             dQ.template topLeftCorner<Dim,Dim>().setZero();
-            dQ.col(Dim).template head<Dim>() = Base::m_dSumP.col(dim);
-            dQ.row(Dim).template head<Dim>() = Base::m_dSumP.col(dim);
-            dQ(Dim,Dim) = m_dSumDotPP[dim];
-            dQ -= Base::m_dSumW[dim] * Base::m_matQ;
-            dQ *= invSumW;
+            dQ.col(Dim).template head<Dim>() = Base::getWeightSum() * Base::m_dSumP.col(dim) - Base::m_dSumW[dim] * Base::m_sumP ;
+            dQ.row(Dim).template head<Dim>() = Base::getWeightSum() * Base::m_dSumP.col(dim) - Base::m_dSumW[dim] * Base::m_sumP ;
+            dQ(Dim,Dim) = Base::getWeightSum() * m_dSumDotPP[dim] - Base::m_dSumW[dim] * Base::m_sumDotPP;
+            // dQ -= Base::m_dSumW[dim] * Base::m_matQ;
+            Scalar invSumW2 = 1 / ( Base::getWeightSum() * Base::getWeightSum() );
+            dQ *= invSumW2;
 
             const VectorB vec = (m_dmatA[dim] - eigenval_i * dQ) * eigenvec_i;
 

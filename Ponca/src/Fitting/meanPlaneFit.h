@@ -118,11 +118,11 @@ public:
         // Test if base finalize end on a viable case (stable / unstable)
         if (this->isReady())
         {
-            VectorType   barycenter = Base::barycenter();
-            VectorArray dBarycenter = Base::barycenterDerivatives();
+            // VectorType   barycenter = Base::barycenter();
+            // VectorArray dBarycenter = Base::barycenterDerivatives();
 
-            VectorType normal = Base::primitiveGradient();
-            m_dNormal = Base::m_dSumN / Base::getWeightSum();
+            // VectorType normal = Base::primitiveGradient();
+            m_dNormal = Base::meanNormalDerivatives();
 
             // for (int k = 0; k < DataPoint::Dim; ++k){
             //     VectorType dDiff = dBarycenter.col(k);

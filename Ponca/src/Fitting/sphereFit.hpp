@@ -91,7 +91,7 @@ SphereFitImpl<DataPoint, _WFunctor, T>::finalize ()
     Base::m_ul = vecU.template segment<DataPoint::Dim>(1);
     Base::m_uc = vecU[0];
 
-    Base::m_isNormalized = false;
+    Base::m_isNormalized = true;
 
     return Base::m_eCurrentState;
 }

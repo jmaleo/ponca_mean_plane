@@ -73,6 +73,7 @@ namespace Ponca {
         PONCA_EXPLICIT_CAST_OPERATORS(MeanNormal,meanNormal)
         PONCA_FITTING_DECLARE_INIT
         PONCA_FITTING_DECLARE_ADDNEIGHBOR
+
     }; //class MeanNormal
 
     template<class DataPoint, class _WFunctor, int DiffType, typename T>
@@ -140,6 +141,13 @@ public:
     PONCA_EXPLICIT_CAST_OPERATORS_DER(MeanNormalDer,meanNormalDer)
     PONCA_FITTING_DECLARE_INIT
     PONCA_FITTING_DECLARE_ADDNEIGHBOR_DER
+
+    PONCA_MULTIARCH VectorArray meanNormalDerivatives() const
+    {
+        VectorType mean = Base::m_sumN / Base::getWeightSum();
+        return ( m_dSumN - mean * Base::m_dSumW ) / Base::getWeightSum(); 
+    }
+
 }; //class MeanNormalDer
 
 #include "mean.hpp"

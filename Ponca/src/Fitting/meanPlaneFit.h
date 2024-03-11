@@ -122,7 +122,7 @@ public:
             // VectorArray dBarycenter = Base::barycenterDerivatives();
 
             // VectorType normal = Base::primitiveGradient();
-            m_dNormal = Base::meanNormalDerivatives();
+            m_dNormal = Base::dMeanNormal();
 
             // for (int k = 0; k < DataPoint::Dim; ++k){
             //     VectorType dDiff = dBarycenter.col(k);

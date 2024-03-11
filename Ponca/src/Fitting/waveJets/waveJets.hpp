@@ -168,5 +168,11 @@ WaveJets<DataPoint, _WFunctor, T>::m_jet_process(){
     m_k1 /= Base::m_w.evalScale();
     m_k2 /= Base::m_w.evalScale();
 
+    // The signal contains a constant component (phi_2_0) and a component that oscillates two times and whose maximum is aligned with the first principal curvature direction (corresponding to the phase of phi_2_p2).
+    Scalar theta = std::arg(phi_2_p2);
+    m_v1 = std::cos(theta) * m_P.col(1) + std::sin(theta) * m_P.col(2);
+    m_v1 = m_v1.normalized();
+    m_v2 = N.cross(m_v1).normalized();
+
     return Base::m_eCurrentState = STABLE;
 }

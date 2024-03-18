@@ -141,6 +141,44 @@ public:
     
     PONCA_MULTIARCH inline VectorType kmaxDirection() const { return m_v2; }
 
+    PONCA_MULTIARCH inline void operator+= (const ParabolicCylinder& _p)
+    {
+        m_uc += _p.m_uc;
+        m_ul += _p.m_ul;
+        m_a  += _p.m_a;
+        m_uq += _p.m_uq;
+    }
+
+    PONCA_MULTIARCH inline void operator-= (const ParabolicCylinder& _p)
+    {
+        m_uc -= _p.m_uc;
+        m_ul -= _p.m_ul;
+        m_a  -= _p.m_a;
+        m_uq -= _p.m_uq;
+    }
+
+    PONCA_MULTIARCH inline void operator*= (const Scalar& _s)
+    {
+        m_uc *= _s;
+        m_ul *= _s;
+        m_a  *= _s;
+        m_uq *= _s;
+    }
+
+    PONCA_MULTIARCH inline void operator/= (const Scalar& _s)
+    {
+        m_uc /= _s;
+        m_ul /= _s;
+        m_a  /= _s;
+        m_uq /= _s;
+    }
+
+    PONCA_MULTIARCH inline ParabolicCylinder getParabolicCylinder() const
+    {
+        return *this;
+    }
+
+
 }; //class ParabolicCylinder
 
 #include "parabolicCylinder.hpp"

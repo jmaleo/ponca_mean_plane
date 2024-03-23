@@ -26,13 +26,14 @@ namespace Ponca {
 
     protected:
         enum { PROVIDES_MEAN_POSITION };
-        VectorType m_sumP {VectorType::Zero()}; /*!< \brief Sum of the input points vectors */
 
     public:
         PONCA_EXPLICIT_CAST_OPERATORS(MeanPosition,meanPosition)
         PONCA_FITTING_DECLARE_INIT
         PONCA_FITTING_DECLARE_ADDNEIGHBOR
 
+        VectorType m_sumP {VectorType::Zero()}; /*!< \brief Sum of the input points vectors */
+        
         /// \brief Barycenter of the input points
         ///
         /// Defined as \f$ b(\mathbf{x}) = \frac{\sum_i w_\mathbf{x}(\mathbf{p_i}) \mathbf{p_i}}{\sum_i w_\mathbf{x}(\mathbf{p_i})} \f$,
@@ -40,6 +41,32 @@ namespace Ponca {
         PONCA_MULTIARCH inline VectorType barycenter() const {
             return (m_sumP / Base::getWeightSum());
         }
+
+        PONCA_MULTIARCH MeanPosition getMeanPosition() const {
+            return *this;
+        }
+
+        PONCA_MULTIARCH inline void operator+= (const Base & _b) {
+            Base::operator+=(_b);
+            m_sumP += _b.getMeanPositio().m_sumP;
+        }
+
+        PONCA_MULTIARCH inline void operator-= (const Base & _b) {
+            Base::operator-=(_b);
+            m_sumP -= _b.getMeanPosition().m_sumP;
+        }
+
+        PONCA_MULTIARCH inline void operator*= (const Scalar & _s) {
+            Base::operator*=(_s);
+            m_sumP *= _s;
+        }
+
+        PONCA_MULTIARCH inline void operator/= (const Scalar & _s) {
+            Base::operator/=(_s);
+            m_sumP /= _s;
+        }
+
+
 
     }; //class MeanPosition
 
@@ -67,19 +94,52 @@ namespace Ponca {
 
     protected:
         enum { PROVIDES_MEAN_NORMAL };
-        VectorType m_sumN;    /*!< \brief Sum of the normal vectors */
 
     public:
         PONCA_EXPLICIT_CAST_OPERATORS(MeanNormal,meanNormal)
         PONCA_FITTING_DECLARE_INIT
         PONCA_FITTING_DECLARE_ADDNEIGHBOR
 
+        VectorType m_sumN;    /*!< \brief Sum of the normal vectors */
+        
         /// \brief Mean of the normals of the input points
         ///
         /// Defined as \f$ n(\mathbf{x}) = \frac{\sum_i w_\mathbf{x}(\mathbf{p_i}) \mathbf{n_i}}{\sum_i w_\mathbf{x}(\mathbf{p_i})} \f$,
         ///  where \f$\left[\mathbf{p_i}, \mathbf{n_i} \in \text{neighborhood}(\mathbf{x})\right]\f$ are all the point and normal samples in \f$\mathbf{x}\f$'s neighborhood
         PONCA_MULTIARCH inline VectorType meanNormalVector() const {
             return (m_sumN / Base::getWeightSum());
+        }
+
+        PONCA_MULTIARCH MeanNormal getMeanNormal() const {
+            return *this;
+        }
+
+        PONCA_MULTIARCH inline void operator+= (const Base & _b) {
+            Base::operator+=(_b);
+            m_sumN += _b.getMeanNormal().m_sumN;
+            // normalize
+            // m_sumN.normalize();
+        }
+
+        PONCA_MULTIARCH inline void operator-= (const Base & _b) {
+            Base::operator-=(_b);
+            m_sumN -= _b.getMeanNormal().m_sumN;
+            // normalize
+            // m_sumN.normalize();
+        }
+
+        PONCA_MULTIARCH inline void operator*= (const Scalar & _s) {
+            Base::operator*=(_s);
+            m_sumN *= _s;
+            // normalize
+            // m_sumN.normalize();
+        }
+
+        PONCA_MULTIARCH inline void operator/= (const Scalar & _s) {
+            Base::operator/=(_s);
+            m_sumN /= _s;
+            // normalize
+            // m_sumN.normalize();
         }
 
     }; //class MeanNormal

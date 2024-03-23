@@ -37,8 +37,10 @@ public:
 
 // results
 public:
+
     using Matrix2       = Eigen::Matrix<Scalar, 2, 2>;
     using Vector2       = Eigen::Matrix<Scalar, 2, 1>;
+
 
 
     // f(q) = m_uc + m_ul^T * q + m_a * q^T * (m_uq^T * m_uq) * q;
@@ -141,24 +143,31 @@ public:
     
     PONCA_MULTIARCH inline VectorType kmaxDirection() const { return m_v2; }
 
-    PONCA_MULTIARCH inline void operator+= (const ParabolicCylinder& _p)
+    PONCA_MULTIARCH inline void operator+= (const Base& _b)
     {
-        m_uc += _p.m_uc;
-        m_ul += _p.m_ul;
-        m_a  += _p.m_a;
-        m_uq += _p.m_uq;
+        Base::operator+=(_b);
+        const ParabolicCylinder p = _b.getParabolicCylinder();
+        m_uc += p.m_uc;
+        m_ul += p.m_ul;
+        m_a  += p.m_a;
+        m_uq += p.m_uq;
     }
 
-    PONCA_MULTIARCH inline void operator-= (const ParabolicCylinder& _p)
+    PONCA_MULTIARCH inline void operator-= (const Base& _b)
     {
-        m_uc -= _p.m_uc;
-        m_ul -= _p.m_ul;
-        m_a  -= _p.m_a;
-        m_uq -= _p.m_uq;
+        Base::operator-=(_b);
+        const ParabolicCylinder p = _b.getParabolicCylinder();
+        // Maybe _b::ParabolicCylinder.m_uc / m_ul and so on should be protected
+        // But it could be working as well
+        m_uc -= p.m_uc;
+        m_ul -= p.m_ul;
+        m_a  -= p.m_a;
+        m_uq -= p.m_uq;
     }
 
     PONCA_MULTIARCH inline void operator*= (const Scalar& _s)
     {
+        Base::operator*=(_s);
         m_uc *= _s;
         m_ul *= _s;
         m_a  *= _s;
@@ -167,13 +176,14 @@ public:
 
     PONCA_MULTIARCH inline void operator/= (const Scalar& _s)
     {
+        Base::operator/=(_s);
         m_uc /= _s;
         m_ul /= _s;
         m_a  /= _s;
         m_uq /= _s;
     }
 
-    PONCA_MULTIARCH inline ParabolicCylinder getParabolicCylinder() const
+    PONCA_MULTIARCH inline ParabolicCylinder getParabolicCylinder() const 
     {
         return *this;
     }

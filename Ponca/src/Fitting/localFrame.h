@@ -39,6 +39,32 @@ protected:
 public:
     PONCA_EXPLICIT_CAST_OPERATORS(LocalFrame,localFrame)
 
+    PONCA_MULTIARCH inline LocalFrame getLocalFrame() const { return *this; }
+
+    PONCA_MULTIARCH inline void operator+=(const Base& _b)
+    {
+        Base::operator+=(_b);
+        computeFrameFromNormalVector(Base::primitiveGradient());
+    }
+
+    PONCA_MULTIARCH inline void operator-=(const Base& _b)
+    {
+        Base::operator-=(_b);
+        computeFrameFromNormalVector(Base::primitiveGradient());
+    }
+
+    PONCA_MULTIARCH inline void operator*=(const Scalar& _s)
+    {
+        Base::operator*=(_s);
+        computeFrameFromNormalVector(Base::primitiveGradient());
+    }
+
+    PONCA_MULTIARCH inline void operator/=(const Scalar& _s)
+    {
+        Base::operator/=(_s);
+        computeFrameFromNormalVector(Base::primitiveGradient());
+    }
+
     /*! \brief Set the vectors of the local frame to zero 
      *  \param _basisCenter Center of the local frame
      */

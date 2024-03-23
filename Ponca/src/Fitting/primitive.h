@@ -27,6 +27,7 @@ namespace Ponca
 template < class DataPoint, class _WFunctor, typename T = void  >
 class PrimitiveBase
 {
+
 protected:
     enum {
         PROVIDES_PRIMITIVE_BASE,    /*!< \brief Provides base API for primitives*/
@@ -54,6 +55,35 @@ protected:
     WFunctor   m_w;
 
 public:
+
+    PONCA_MULTIARCH inline PrimitiveBase getPrimitiveBase() const { return *this; };
+
+    template <typename BaseType>
+    PONCA_MULTIARCH inline void operator+= (const BaseType& _b)
+    {
+        m_nbNeighbors += _b.getPrimitiveBase().getNumNeighbors();
+        m_sumW += _b.m_sumW.getPrimitiveBase().getWeightSum();
+    }
+
+    template <typename BaseType>
+    PONCA_MULTIARCH inline void operator-= (const BaseType& _b)
+    {
+        m_nbNeighbors -= _b.getPrimitiveBase().getNumNeighbors();
+        m_sumW -= _b.getPrimitiveBase().getWeightSum();
+    }
+
+    PONCA_MULTIARCH inline void operator*= (const Scalar& _s)
+    {
+        m_nbNeighbors *= _s;
+        m_sumW *= _s;
+    }
+
+    PONCA_MULTIARCH inline void operator/= (const Scalar& _s)
+    {
+        m_nbNeighbors /= _s;
+        m_sumW /= _s;
+    }
+
     /**************************************************************************/
     /* Initialization                                                         */
     /**************************************************************************/

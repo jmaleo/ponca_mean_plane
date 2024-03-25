@@ -43,6 +43,44 @@ protected:
 public:
     PONCA_EXPLICIT_CAST_OPERATORS(OrientedSphereFitImpl,orientedSphereFit)
     PONCA_FITTING_DECLARE_INIT_ADD_FINALIZE
+
+    template <typename BaseType>
+    PONCA_MULTIARCH inline void operator += ( const BaseType& _b )
+    {
+        Base::operator+=(_b);
+        m_sumDotPN += _b.m_sumDotPN;
+        m_sumDotPP += _b.m_sumDotPP;
+        m_nume     += _b.m_nume;
+        m_deno     += _b.m_deno;
+    }
+    
+    PONCA_MULTIARCH inline void operator *= ( const Scalar& _s )
+    {
+        Base::operator*=(_s);
+        m_sumDotPN *= _s;
+        m_sumDotPP *= _s;
+        m_nume     *= _s;
+        m_deno     *= _s;
+    }
+
+    PONCA_MULTIARCH inline void operator /= ( const Scalar& _s )
+    {
+        Base::operator/=(_s);
+        m_sumDotPN /= _s;
+        m_sumDotPP /= _s;
+        m_nume     /= _s;
+        m_deno     /= _s;
+    }
+
+    PONCA_MULTIARCH inline void to_string () const {
+        // Base::to_string();
+        std::cout << "m_sumDotPN: " << m_sumDotPN << std::endl;
+        std::cout << "m_sumDotPP: " << m_sumDotPP << std::endl;
+        std::cout << "m_nume: " << m_nume << std::endl;
+        std::cout << "m_deno: " << m_deno << std::endl;
+    
+    }
+
 }; //class OrientedSphereFitImpl
 
 /// \brief Helper alias for Oriented Sphere fitting on 3D points using OrientedSphereFitImpl

@@ -41,13 +41,15 @@ public:
 
     PONCA_MULTIARCH inline LocalFrame getLocalFrame() const { return *this; }
 
-    PONCA_MULTIARCH inline void operator+=(const Base& _b)
+    template <typename BaseType>
+    PONCA_MULTIARCH inline void operator+=(const BaseType& _b)
     {
         Base::operator+=(_b);
         computeFrameFromNormalVector(Base::primitiveGradient());
     }
 
-    PONCA_MULTIARCH inline void operator-=(const Base& _b)
+    template <typename BaseType>
+    PONCA_MULTIARCH inline void operator-=(const BaseType& _b)
     {
         Base::operator-=(_b);
         computeFrameFromNormalVector(Base::primitiveGradient());

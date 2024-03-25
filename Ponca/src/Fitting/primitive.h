@@ -62,7 +62,7 @@ public:
     PONCA_MULTIARCH inline void operator+= (const BaseType& _b)
     {
         m_nbNeighbors += _b.getPrimitiveBase().getNumNeighbors();
-        m_sumW += _b.m_sumW.getPrimitiveBase().getWeightSum();
+        m_sumW += _b.getPrimitiveBase().getWeightSum();
     }
 
     template <typename BaseType>

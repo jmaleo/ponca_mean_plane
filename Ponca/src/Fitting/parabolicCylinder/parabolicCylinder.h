@@ -143,50 +143,52 @@ public:
     
     PONCA_MULTIARCH inline VectorType kmaxDirection() const { return m_v2; }
 
-    PONCA_MULTIARCH inline void operator+= (const Base& _b)
-    {
-        Base::operator+=(_b);
-        const ParabolicCylinder p = _b.getParabolicCylinder();
-        m_uc += p.m_uc;
-        m_ul += p.m_ul;
-        m_a  += p.m_a;
-        m_uq += p.m_uq;
-    }
+    // template <typename BaseType>
+    // PONCA_MULTIARCH inline void operator+= (const BaseType& _b)
+    // {
+    //     Base::operator+=(_b);
+    //     const ParabolicCylinder p = _b.getParabolicCylinder();
+    //     m_uc += p.m_uc;
+    //     m_ul += p.m_ul;
+    //     m_a  += p.m_a;
+    //     m_uq += p.m_uq;
+    // }
 
-    PONCA_MULTIARCH inline void operator-= (const Base& _b)
-    {
-        Base::operator-=(_b);
-        const ParabolicCylinder p = _b.getParabolicCylinder();
-        // Maybe _b::ParabolicCylinder.m_uc / m_ul and so on should be protected
-        // But it could be working as well
-        m_uc -= p.m_uc;
-        m_ul -= p.m_ul;
-        m_a  -= p.m_a;
-        m_uq -= p.m_uq;
-    }
+    // template <typename BaseType>
+    // PONCA_MULTIARCH inline void operator-= (const BaseType& _b)
+    // {
+    //     Base::operator-=(_b);
+    //     const ParabolicCylinder p = _b.getParabolicCylinder();
+    //     // Maybe _b::ParabolicCylinder.m_uc / m_ul and so on should be protected
+    //     // But it could be working as well
+    //     m_uc -= p.m_uc;
+    //     m_ul -= p.m_ul;
+    //     m_a  -= p.m_a;
+    //     m_uq -= p.m_uq;
+    // }
 
-    PONCA_MULTIARCH inline void operator*= (const Scalar& _s)
-    {
-        Base::operator*=(_s);
-        m_uc *= _s;
-        m_ul *= _s;
-        m_a  *= _s;
-        m_uq *= _s;
-    }
+    // PONCA_MULTIARCH inline void operator*= (const Scalar& _s)
+    // {
+    //     Base::operator*=(_s);
+    //     m_uc *= _s;
+    //     m_ul *= _s;
+    //     m_a  *= _s;
+    //     m_uq *= _s;
+    // }
 
-    PONCA_MULTIARCH inline void operator/= (const Scalar& _s)
-    {
-        Base::operator/=(_s);
-        m_uc /= _s;
-        m_ul /= _s;
-        m_a  /= _s;
-        m_uq /= _s;
-    }
+    // PONCA_MULTIARCH inline void operator/= (const Scalar& _s)
+    // {
+    //     Base::operator/=(_s);
+    //     m_uc /= _s;
+    //     m_ul /= _s;
+    //     m_a  /= _s;
+    //     m_uq /= _s;
+    // }
 
-    PONCA_MULTIARCH inline ParabolicCylinder getParabolicCylinder() const 
-    {
-        return *this;
-    }
+    // PONCA_MULTIARCH inline ParabolicCylinder getParabolicCylinder() const 
+    // {
+    //     return *this;
+    // }
 
 
 }; //class ParabolicCylinder

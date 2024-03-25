@@ -46,12 +46,14 @@ namespace Ponca {
             return *this;
         }
 
-        PONCA_MULTIARCH inline void operator+= (const Base & _b) {
+        template <typename BaseType>
+        PONCA_MULTIARCH inline void operator+= (const BaseType & _b) {
             Base::operator+=(_b);
-            m_sumP += _b.getMeanPositio().m_sumP;
+            m_sumP += _b.getMeanPosition().m_sumP;
         }
 
-        PONCA_MULTIARCH inline void operator-= (const Base & _b) {
+        template <typename BaseType>
+        PONCA_MULTIARCH inline void operator-= (const BaseType & _b) {
             Base::operator-=(_b);
             m_sumP -= _b.getMeanPosition().m_sumP;
         }
@@ -114,14 +116,16 @@ namespace Ponca {
             return *this;
         }
 
-        PONCA_MULTIARCH inline void operator+= (const Base & _b) {
+        template <typename BaseType>
+        PONCA_MULTIARCH inline void operator+= (const BaseType & _b) {
             Base::operator+=(_b);
             m_sumN += _b.getMeanNormal().m_sumN;
             // normalize
             // m_sumN.normalize();
         }
 
-        PONCA_MULTIARCH inline void operator-= (const Base & _b) {
+        template <typename BaseType>
+        PONCA_MULTIARCH inline void operator-= (const BaseType & _b) {
             Base::operator-=(_b);
             m_sumN -= _b.getMeanNormal().m_sumN;
             // normalize

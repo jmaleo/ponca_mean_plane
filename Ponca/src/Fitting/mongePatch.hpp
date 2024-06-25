@@ -74,10 +74,9 @@ typename MongePatch<DataPoint, _WFunctor, T>::Scalar
 MongePatch<DataPoint, _WFunctor, T>::kMean() const {
   PONCA_MULTIARCH_STD_MATH(pow);
   static const Scalar one (1);
-  static const Scalar two (2);
   static const Scalar threeOverTwo (Scalar(3)/Scalar(2));
-  return ((one + pow(h_v(),two) ) * h_uu() * two*h_u()*h_v()*h_uv() + (one+pow(h_u(),two))*h_vv()) /
-      (two * pow(one +pow(h_u(),two) + pow(h_v(),two),threeOverTwo));
+  return ( h_uu() * ( one + pow( h_v(), two ) ) - h_u() * h_v() * h_uv() + h_vv() * ( one + pow( h_u(), two ) ) * h_vv() ) /
+      ( pow(one +pow(h_u(),two) + pow(h_v(),two),threeOverTwo ) );
 }
 
 template < class DataPoint, class _WFunctor, typename T>
@@ -85,8 +84,8 @@ typename MongePatch<DataPoint, _WFunctor, T>::Scalar
 MongePatch<DataPoint, _WFunctor, T>::GaussianCurvature() const {
     PONCA_MULTIARCH_STD_MATH(pow);
     static const Scalar one (1);
-    static const Scalar two (2);
-    return (h_uu()*h_vv() - pow(h_uv(),two)) /
+    static const Scalar four (4);
+    return (4 * h_uu()*h_vv() - pow(h_uv(),two)) /
         pow((one + pow(h_u(),two) + pow(h_v(),two) ), two);
 }
 
@@ -94,24 +93,32 @@ template < class DataPoint, class _WFunctor, typename T>
 typename MongePatch<DataPoint, _WFunctor, T>::Scalar
 MongePatch<DataPoint, _WFunctor, T>::kmin() const {
 
-    Eigen::Matrix<Scalar, 2, 2> hess;
-    hess << h_uu(), h_uv(), h_uv(), h_vv();
+    // Eigen::Matrix<Scalar, 2, 2> hess;
+    // hess << h_uu(), h_uv(), h_uv(), h_vv();
 
-    Eigen::SelfAdjointEigenSolver<Eigen::Matrix<Scalar, 2, 2>> es(-hess);
+    // Eigen::SelfAdjointEigenSolver<Eigen::Matrix<Scalar, 2, 2>> es(-hess);
+    // Scalar kmin = es.eigenvalues()(0);
 
-    return es.eigenvalues()(0);
+    Scalar gauss = GaussianCurvature();
+    Scalar mean = kMean();
+    Scalar kMin_from_fundamentals = mean - sqrt(mean*mean - gauss);
+    return kMin_from_fundamentals;
 }
 
 template < class DataPoint, class _WFunctor, typename T>
 typename MongePatch<DataPoint, _WFunctor, T>::Scalar
 MongePatch<DataPoint, _WFunctor, T>::kmax() const {
 
-    Eigen::Matrix<Scalar, 2, 2> hess;
-    hess << h_uu(), h_uv(), h_uv(), h_vv();
+    // Eigen::Matrix<Scalar, 2, 2> hess;
+    // hess << h_uu(), h_uv(), h_uv(), h_vv();
 
-    Eigen::SelfAdjointEigenSolver<Eigen::Matrix<Scalar, 2, 2>> es(-hess);
+    // Eigen::SelfAdjointEigenSolver<Eigen::Matrix<Scalar, 2, 2>> es(-hess);
+    // Scalar kmax = es.eigenvalues()(1);
 
-    return es.eigenvalues()(1);
+    Scalar gauss = GaussianCurvature();
+    Scalar mean = kMean();
+    Scalar kMax_from_fundamentals = mean + sqrt(mean*mean - gauss);
+    return kMax_from_fundamentals;
 }
 
 template < class DataPoint, class _WFunctor, typename T>

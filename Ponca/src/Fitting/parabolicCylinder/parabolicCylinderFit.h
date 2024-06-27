@@ -56,9 +56,6 @@ private:
     PONCA_MULTIARCH inline void    m_uq_parabolic_fitting    ();
     PONCA_MULTIARCH inline void    m_a_parabolic_fitting     ();
     PONCA_MULTIARCH inline void    m_uc_ul_parabolic_fitting ();
-
-    PONCA_MULTIARCH inline void    m_compute_curvature       ();
-
     
 }; //class ParabolicCylinderFitImpl
 

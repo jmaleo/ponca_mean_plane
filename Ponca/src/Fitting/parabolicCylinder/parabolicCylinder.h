@@ -37,8 +37,10 @@ public:
 
 // results
 public:
+
     using Matrix2       = Eigen::Matrix<Scalar, 2, 2>;
     using Vector2       = Eigen::Matrix<Scalar, 2, 1>;
+
 
 
     // f(q) = m_uc + m_ul^T * q + m_a * q^T * (m_uq^T * m_uq) * q;
@@ -88,7 +90,7 @@ public:
         Scalar first = m_uc + m_ul.transpose() * q;
         Scalar second = q.transpose() * m_uq * q;
 
-        return m_correctOrientation * ( first + m_a * second ) ;
+        return first + m_a * second ;
     }
 
     //! \brief Make the primitive fitting to be a demi-ellipsoid instead of a parabolic cylinder
@@ -124,22 +126,57 @@ public:
         return n / n.norm();
     }
 
+    PONCA_MULTIARCH inline const Scalar h_uu () const { return m_uq(0,0);   }
+    PONCA_MULTIARCH inline const Scalar h_vv () const { return m_uq(1,1); }
+    PONCA_MULTIARCH inline const Scalar h_uv () const { return m_uq(1,0); }
+    PONCA_MULTIARCH inline const Scalar h_u  () const { return m_ul(0); }
+    PONCA_MULTIARCH inline const Scalar h_v  () const { return m_ul(1); }
+    PONCA_MULTIARCH inline const Scalar h_c  () const { return m_uc; }
+
+    // Partial Derivatives at (u,v) = (0,0)
+    PONCA_MULTIARCH inline const Scalar dh_uu () const { return Scalar(2) * m_a * h_uu(); }
+    PONCA_MULTIARCH inline const Scalar dh_vv () const { return Scalar(2) * m_a * h_vv(); }
+    PONCA_MULTIARCH inline const Scalar dh_uv () const { return Scalar(2) * m_a * h_uv(); }
+    PONCA_MULTIARCH inline const Scalar dh_u  () const { return h_u(); }
+    PONCA_MULTIARCH inline const Scalar dh_v  () const { return h_v(); }
+    PONCA_MULTIARCH inline const Scalar dh_c  () const { return Scalar(0); }
+
+    PONCA_MULTIARCH inline const Scalar dE () const { return Scalar (1) + ( dh_u() * dh_u() ); }
+    PONCA_MULTIARCH inline const Scalar dF () const { return dh_u() * dh_v(); }
+    PONCA_MULTIARCH inline const Scalar dG () const { return Scalar (1) + ( dh_v() * dh_v() ); }
+    PONCA_MULTIARCH inline const Scalar dL () const { 
+        PONCA_MULTIARCH_STD_MATH(pow);
+        static const Scalar one (1);
+        static const Scalar two (2);
+        static const Scalar oneOverTwo (Scalar(1)/Scalar(2));
+        return ( dh_uu() ) / ( pow( pow( dh_u(), two) + pow( dh_v(), two) + one , oneOverTwo ) );
+    }
+    PONCA_MULTIARCH inline const Scalar dM () const { 
+        PONCA_MULTIARCH_STD_MATH(pow);
+        static const Scalar one (1);
+        static const Scalar two (2);
+        static const Scalar oneOverTwo (Scalar(1)/Scalar(2));
+        return ( dh_uv() ) / ( pow( pow( dh_u(), two) + pow( dh_v(), two) + one , oneOverTwo ) );
+    }
+    PONCA_MULTIARCH inline const Scalar dN () const { 
+        PONCA_MULTIARCH_STD_MATH(pow);
+        static const Scalar one (1);
+        static const Scalar two (2);
+        static const Scalar oneOverTwo (Scalar(1)/Scalar(2));
+        return ( dh_vv() ) / ( pow( pow( dh_u(), two) + pow( dh_v(), two) + one , oneOverTwo ) );
+    }
+    
     // The result seems to be the same as ACP on the Hessian when using dNormal() with curvatureEstimation.h
     PONCA_MULTIARCH inline MatrixType dNormal() const;
 
     PONCA_MULTIARCH inline Scalar alpha_curvature () const { return m_a; }
+    PONCA_MULTIARCH inline Scalar kmin () const;
+    PONCA_MULTIARCH inline Scalar kmax () const;
+    PONCA_MULTIARCH inline Scalar kMean () const;
+    PONCA_MULTIARCH inline Scalar GaussianCurvature () const;
+    PONCA_MULTIARCH inline VectorType kminDirection() const;
+    PONCA_MULTIARCH inline VectorType kmaxDirection() const;
 
-    PONCA_MULTIARCH inline Scalar kmin () const { return m_k1; }
-
-    PONCA_MULTIARCH inline Scalar kmax () const { return m_k2; }
-
-    PONCA_MULTIARCH inline Scalar kMean () const { return (m_k1 + m_k2) / Scalar(2); }
-
-    PONCA_MULTIARCH inline Scalar GaussianCurvature () const { return m_k1 * m_k2; }
-
-    PONCA_MULTIARCH inline VectorType kminDirection() const { return m_v1; }
-    
-    PONCA_MULTIARCH inline VectorType kmaxDirection() const { return m_v2; }
 
 }; //class ParabolicCylinder
 

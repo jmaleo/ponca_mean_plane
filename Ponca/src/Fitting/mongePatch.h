@@ -94,6 +94,42 @@ public:
     PONCA_MULTIARCH inline const Scalar & h_v  () const { return *(m_x.data()+4); }
     PONCA_MULTIARCH inline const Scalar & h_c  () const { return *(m_x.data()+5); }
 
+    // Partial Derivatives at (u,v) = (0,0)
+    PONCA_MULTIARCH inline const Scalar dh_uu () const { return Scalar(2) * ( h_uu() );   }
+    PONCA_MULTIARCH inline const Scalar dh_vv () const { return Scalar(2) * ( h_vv() ); }
+    PONCA_MULTIARCH inline const Scalar dh_uv () const { return h_uv(); }
+    PONCA_MULTIARCH inline const Scalar dh_u  () const { return h_u(); }
+    PONCA_MULTIARCH inline const Scalar dh_v  () const { return h_v(); }
+    PONCA_MULTIARCH inline const Scalar dh_c  () const { return Scalar(0); }
+
+    PONCA_MULTIARCH inline const Scalar dE () const { return Scalar (1) + ( dh_u() * dh_u() ); }
+    PONCA_MULTIARCH inline const Scalar dF () const { return dh_u() * dh_v(); }
+    PONCA_MULTIARCH inline const Scalar dG () const { return Scalar (1) + ( dh_v() * dh_v() ); }
+    
+    PONCA_MULTIARCH inline const Scalar dL () const { 
+        PONCA_MULTIARCH_STD_MATH(pow);
+        static const Scalar one (1);
+        static const Scalar two (2);
+        static const Scalar oneOverTwo (Scalar(1)/Scalar(2));
+        return ( dh_uu() ) / ( pow( pow( dh_u(), two) + pow( dh_v(), two) + one , oneOverTwo ) );
+    }
+
+    PONCA_MULTIARCH inline const Scalar dM () const { 
+        PONCA_MULTIARCH_STD_MATH(pow);
+        static const Scalar one (1);
+        static const Scalar two (2);
+        static const Scalar oneOverTwo (Scalar(1)/Scalar(2));
+        return ( dh_uv() ) / ( pow( pow( dh_u(), two) + pow( dh_v(), two) + one , oneOverTwo ) );
+    }
+
+    PONCA_MULTIARCH inline const Scalar dN () const { 
+        PONCA_MULTIARCH_STD_MATH(pow);
+        static const Scalar one (1);
+        static const Scalar two (2);
+        static const Scalar oneOverTwo (Scalar(1)/Scalar(2));
+        return ( dh_vv() ) / ( pow( pow( dh_u(), two) + pow( dh_v(), two) + one , oneOverTwo ) );
+    }
+
 };
 
 /// \brief Helper alias for MongePatch fitting on 3D points using MongePatch

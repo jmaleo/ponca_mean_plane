@@ -83,7 +83,6 @@ ParabolicCylinderFitImpl<DataPoint, _WFunctor, T>::m_fitting_process () {
         m_uq_parabolic_fitting();
         m_a_parabolic_fitting();
         m_uc_ul_parabolic_fitting();
-        m_compute_curvature();
     }
 
 }
@@ -162,20 +161,4 @@ ParabolicCylinderFitImpl<DataPoint, _WFunctor, T>::m_uc_ul_parabolic_fitting () 
     Base::m_uc    = x(0,0);
     Base::m_ul(0) = x(1,0);
     Base::m_ul(1) = x(2,0);
-}
-
-
-template < class DataPoint, class _WFunctor, typename T>
-void
-ParabolicCylinderFitImpl<DataPoint, _WFunctor, T>::m_compute_curvature() {
-    Scalar curv = Base::m_correctOrientation * Scalar(2) * Base::m_a;
-
-    if (curv <= 0) {
-        Base::m_k1 = curv;
-        Base::m_k2 = Scalar(0);
-    }
-    else {
-        Base::m_k1 = Scalar(0);
-        Base::m_k2 = curv;
-    }
 }

@@ -48,6 +48,56 @@ public:
     PONCA_EXPLICIT_CAST_OPERATORS(OrientedParabolicCylinderFitImpl,orientedParabolicCylinderFitImpl)
     PONCA_FITTING_DECLARE_INIT_ADD_FINALIZE
 
+    PONCA_MULTIARCH inline OrientedParabolicCylinderFitImpl getOrientedParabolicCylinderFit() const { return *this; }
+
+    template <typename BaseType>
+    PONCA_MULTIARCH inline void operator += ( const BaseType& _b ){
+        Base::operator+=(_b);
+        const auto & orientedPara = _b.getOrientedParabolicCylinderFit();
+        m_sumN2D += orientedPara.m_sumN2D;
+        m_sumP2D += orientedPara.m_sumP2D;
+        m_sumDotPN2D += orientedPara.m_sumDotPN2D;
+        m_sumDotPP2D += orientedPara.m_sumDotPP2D;
+        m_prodPP2D += orientedPara.m_prodPP2D;
+        m_prodPN2D += orientedPara.m_prodPN2D;
+        m_sumH += orientedPara.m_sumH;
+    }
+
+    template <typename BaseType>
+    PONCA_MULTIARCH inline void operator -= ( const BaseType& _b ){
+        Base::operator-=(_b);
+        const auto & orientedPara = _b.getOrientedParabolicCylinderFit();
+        m_sumN2D -= orientedPara.m_sumN2D;
+        m_sumP2D -= orientedPara.m_sumP2D;
+        m_sumDotPN2D -= orientedPara.m_sumDotPN2D;
+        m_sumDotPP2D -= orientedPara.m_sumDotPP2D;
+        m_prodPP2D -= orientedPara.m_prodPP2D;
+        m_prodPN2D -= orientedPara.m_prodPN2D;
+        m_sumH -= orientedPara.m_sumH;
+    }
+
+    PONCA_MULTIARCH inline void operator *= ( const Scalar& _s ){
+        Base::operator*=(_s);
+        m_sumN2D *= _s;
+        m_sumP2D *= _s;
+        m_sumDotPN2D *= _s;
+        m_sumDotPP2D *= _s;
+        m_prodPP2D *= _s;
+        m_prodPN2D *= _s;
+        m_sumH *= _s;
+    }
+
+    PONCA_MULTIARCH inline void operator /= ( const Scalar& _s ){
+        Base::operator/=(_s);
+        m_sumN2D /= _s;
+        m_sumP2D /= _s;
+        m_sumDotPN2D /= _s;
+        m_sumDotPP2D /= _s;
+        m_prodPP2D /= _s;
+        m_prodPN2D /= _s;
+        m_sumH /= _s;
+    }
+    
 private:
 
     PONCA_MULTIARCH inline void    m_fitting_process         ();
@@ -68,6 +118,7 @@ private:
         }
 
     }
+    
 
 
 }; //class OrientedParabolicCylinderFitImpl

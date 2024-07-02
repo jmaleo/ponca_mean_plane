@@ -192,7 +192,7 @@ OrientedParabolicCylinderFitImpl<DataPoint, _WFunctor, T>::m_ellipsoid_fitting (
     C = C + C.transpose().eval();
     Base::m_uq = Internal::solve_symmetric_sylvester(A, C);
     Base::m_ul = invSumW * (m_sumN2D - Scalar(2) * Base::m_uq * m_sumP2D);
-    Base::m_uc = - invSumW * ( Base::m_ul.transpose() * m_sumP2D + (m_prodPP2D * Base::m_uq).trace() - m_sumH);
+    Base::m_uc = - invSumW * ( Base::m_ul.transpose() * m_sumP2D + (m_prodPP2D * Base::m_uq).trace() + m_sumH);
     Base::m_a = Scalar(1);
 }
 

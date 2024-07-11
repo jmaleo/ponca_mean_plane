@@ -95,9 +95,9 @@ public:
     PONCA_MULTIARCH inline const Scalar & h_c  () const { return *(m_x.data()+5); }
 
     // Partial Derivatives at (u,v) = (0,0)
-    PONCA_MULTIARCH inline const Scalar dh_uu () const { return Scalar(2) * ( h_uu() );   }
-    PONCA_MULTIARCH inline const Scalar dh_vv () const { return Scalar(2) * ( h_vv() ); }
-    PONCA_MULTIARCH inline const Scalar dh_uv () const { return h_uv(); }
+    PONCA_MULTIARCH inline const Scalar dh_uu () const { return Scalar(-2) * ( h_uu() ); }
+    PONCA_MULTIARCH inline const Scalar dh_vv () const { return Scalar(-2) * ( h_vv() ); }
+    PONCA_MULTIARCH inline const Scalar dh_uv () const { return Scalar(-1) * ( h_uv() ); }
     PONCA_MULTIARCH inline const Scalar dh_u  () const { return h_u(); }
     PONCA_MULTIARCH inline const Scalar dh_v  () const { return h_v(); }
     PONCA_MULTIARCH inline const Scalar dh_c  () const { return Scalar(0); }
@@ -138,9 +138,9 @@ template < class DataPoint, class _WFunctor, typename T>
     using MongePatchFit = Ponca::MongePatch<DataPoint, _WFunctor,
                             Ponca::CovariancePlaneFitImpl<DataPoint, _WFunctor,
                                 Ponca::CovarianceFitBase<DataPoint, _WFunctor,
-                                        Ponca::MeanPosition<DataPoint, _WFunctor,
-                                            Ponca::LocalFrame<DataPoint, _WFunctor,
-                                                Ponca::Plane<DataPoint, _WFunctor,T>>>>>>;
+                                    Ponca::MeanPosition<DataPoint, _WFunctor,
+                                        Ponca::LocalFrame<DataPoint, _WFunctor,
+                                            Ponca::Plane<DataPoint, _WFunctor,T>>>>>>;
 //! [MongePatchFit Definition]
 
 /// \brief Helper alias for Oriented MongePatch fitting on 3D points using oriented MongePatch
@@ -148,10 +148,10 @@ template < class DataPoint, class _WFunctor, typename T>
 template < class DataPoint, class _WFunctor, typename T>
     using OrientedMongePatchFit = Ponca::MongePatch<DataPoint, _WFunctor,
                                     Ponca::MeanPlaneFitImpl<DataPoint, _WFunctor,
-                                            Ponca::MeanNormal<DataPoint, _WFunctor,
-                                                Ponca::MeanPosition<DataPoint, _WFunctor,
-                                                    Ponca::LocalFrame<DataPoint, _WFunctor,
-                                                        Ponca::Plane<DataPoint, _WFunctor,T>>>>>>;
+                                        Ponca::MeanNormal<DataPoint, _WFunctor,
+                                            Ponca::MeanPosition<DataPoint, _WFunctor,
+                                                Ponca::LocalFrame<DataPoint, _WFunctor,
+                                                    Ponca::Plane<DataPoint, _WFunctor,T>>>>>>;
 //! [OrientedMongePatchFit Definition]
 
 #include "mongePatch.hpp"

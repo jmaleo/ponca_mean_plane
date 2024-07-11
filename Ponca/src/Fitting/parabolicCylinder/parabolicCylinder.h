@@ -27,7 +27,6 @@ protected:
         check = Base::PROVIDES_PRIMITIVE_BASE 
         && Base::PROVIDES_PLANE,                                        /*!< \brief Requires PrimitiveBase      */
         PROVIDES_PARABOLIC_CYLINDER,                                    /*!< \brief Provides Parabolic cylinder */
-        PROVIDES_NORMAL_DERIVATIVE,                                     /*!< \brief Provides Normal Derivative  */
     };
 
 public:
@@ -87,26 +86,11 @@ public:
 
     PONCA_MULTIARCH inline Scalar eval_quadratic_function(Scalar q1, Scalar q2) const {
         Vector2 q {q1, q2};
-        Scalar first = m_uc + m_ul.transpose() * q;
-        Scalar second = q.transpose() * m_uq * q;
-
-        return first + m_a * second ;
+        return h_c() + h_u()*q1 + h_v()*q2 + m_a * ( h_uu() * q1 * q1 + h_vv() * q2 * q2 + Scalar(2) * h_uv() * q1 * q2 );
     }
 
     //! \brief Make the primitive fitting to be a demi-ellipsoid instead of a parabolic cylinder
     PONCA_MULTIARCH inline void setCylinder(bool b) { m_isCylinder = b; }
-
-    PONCA_MULTIARCH inline void correct_orientation() {
-        // Check the angle between Base::primitiveGradient() and Base::primitiveGradient()
-        // If the angle is > 135°, we need to correct the orientation of the primitive
-        VectorType n = Base::primitiveGradient();
-        VectorType nGrad = primitiveGradient();
-        Scalar angle = std::acos(n.dot(nGrad) / (n.norm() * nGrad.norm()));
-        // if (angle > Scalar(3.0) * M_PI/Scalar(4.0)) {
-        if (angle > M_PI_2) {
-            m_correctOrientation = Scalar(-1);
-        }
-    }
 
     //! \brief Value of the scalar field at the location \f$ \mathbf{q} \f$
     PONCA_MULTIARCH inline Scalar potential (const VectorType& _q) const;
@@ -134,9 +118,9 @@ public:
     PONCA_MULTIARCH inline const Scalar h_c  () const { return m_uc; }
 
     // Partial Derivatives at (u,v) = (0,0)
-    PONCA_MULTIARCH inline const Scalar dh_uu () const { return Scalar(2) * m_a * h_uu(); }
-    PONCA_MULTIARCH inline const Scalar dh_vv () const { return Scalar(2) * m_a * h_vv(); }
-    PONCA_MULTIARCH inline const Scalar dh_uv () const { return Scalar(2) * m_a * h_uv(); }
+    PONCA_MULTIARCH inline const Scalar dh_uu () const { return Scalar(-2) * m_a * h_uu(); }
+    PONCA_MULTIARCH inline const Scalar dh_vv () const { return Scalar(-2) * m_a * h_vv(); }
+    PONCA_MULTIARCH inline const Scalar dh_uv () const { return Scalar(-2) * m_a * h_uv(); }
     PONCA_MULTIARCH inline const Scalar dh_u  () const { return h_u(); }
     PONCA_MULTIARCH inline const Scalar dh_v  () const { return h_v(); }
     PONCA_MULTIARCH inline const Scalar dh_c  () const { return Scalar(0); }
@@ -165,9 +149,6 @@ public:
         static const Scalar oneOverTwo (Scalar(1)/Scalar(2));
         return ( dh_vv() ) / ( pow( pow( dh_u(), two) + pow( dh_v(), two) + one , oneOverTwo ) );
     }
-    
-    // The result seems to be the same as ACP on the Hessian when using dNormal() with curvatureEstimation.h
-    PONCA_MULTIARCH inline MatrixType dNormal() const;
 
     PONCA_MULTIARCH inline Scalar alpha_curvature () const { return m_a; }
     PONCA_MULTIARCH inline Scalar kmin () const;

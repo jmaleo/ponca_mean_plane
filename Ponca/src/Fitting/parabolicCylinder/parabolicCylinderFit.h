@@ -65,25 +65,25 @@ template < class DataPoint, class _WFunctor, typename T>
     using BaseParabolicCylinderFit =
     Ponca::ParabolicCylinderFitImpl<DataPoint, _WFunctor,
         Ponca::ParabolicCylinder<DataPoint, _WFunctor,
-                Ponca::CovariancePlaneFitImpl<DataPoint, _WFunctor,
-                        Ponca::CovarianceFitBase<DataPoint, _WFunctor,
-                            Ponca::MeanNormal<DataPoint, _WFunctor,
-                                Ponca::MeanPosition<DataPoint, _WFunctor,
-                                        Ponca::LocalFrame<DataPoint, _WFunctor,
-                                            Ponca::Plane<DataPoint, _WFunctor,
-                                                Ponca::PrimitiveBase<DataPoint,_WFunctor,T>>>>>>>>>;
+            Ponca::CovariancePlaneFitImpl<DataPoint, _WFunctor,
+                Ponca::CovarianceFitBase<DataPoint, _WFunctor,
+                    Ponca::MeanNormal<DataPoint, _WFunctor,
+                        Ponca::MeanPosition<DataPoint, _WFunctor,
+                            Ponca::LocalFrame<DataPoint, _WFunctor,
+                                Ponca::Plane<DataPoint, _WFunctor,
+                                    Ponca::PrimitiveBase<DataPoint,_WFunctor,T>>>>>>>>>;
                                             
 // Base Method PC-MLS         cov + non oriented
 template < class DataPoint, class _WFunctor, typename T>
     using BaseOrientedParabolicCylinderFit =
         Ponca::ParabolicCylinderFitImpl<DataPoint, _WFunctor,
             Ponca::ParabolicCylinder<DataPoint, _WFunctor,
-                    Ponca::MeanPlaneFitImpl<DataPoint, _WFunctor,
-                        Ponca::MeanNormal<DataPoint, _WFunctor,
-                                Ponca::MeanPosition<DataPoint, _WFunctor,
-                                        Ponca::LocalFrame<DataPoint, _WFunctor,
-                                            Ponca::Plane<DataPoint, _WFunctor,
-                                                Ponca::PrimitiveBase<DataPoint,_WFunctor,T>>>>>>>>;
+                Ponca::MeanPlaneFitImpl<DataPoint, _WFunctor,
+                    Ponca::MeanNormal<DataPoint, _WFunctor,
+                        Ponca::MeanPosition<DataPoint, _WFunctor,
+                            Ponca::LocalFrame<DataPoint, _WFunctor,
+                                Ponca::Plane<DataPoint, _WFunctor,
+                                    Ponca::PrimitiveBase<DataPoint,_WFunctor,T>>>>>>>>;
 //! [ParabolicCylinderFit Definition]
 
 #include "parabolicCylinderFit.hpp"

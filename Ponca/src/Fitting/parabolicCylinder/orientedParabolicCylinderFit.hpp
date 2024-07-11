@@ -171,13 +171,11 @@ OrientedParabolicCylinderFitImpl<DataPoint, _WFunctor, T>::m_fitting_process () 
     
 
     m_ellipsoid_fitting();
-    correct_orientation();
     
     if (Base::m_isCylinder) {
         m_uq_parabolic_fitting();
         m_a_parabolic_fitting();
         m_uc_ul_parabolic_fitting();
-        m_compute_curvature();
     }
     
 }
@@ -259,20 +257,4 @@ OrientedParabolicCylinderFitImpl<DataPoint, _WFunctor, T>::m_uc_ul_parabolic_fit
     Scalar A = Base::m_ul.transpose() * m_sumP2D;
     Scalar B = Base::m_a * (m_prodPP2D * Base::m_uq).trace();
     Base::m_uc = - invSumW * (A + B - m_sumH);
-}
-
-template < class DataPoint, class _WFunctor, typename T>
-void
-OrientedParabolicCylinderFitImpl<DataPoint, _WFunctor, T>::m_compute_curvature() {
-    Scalar curv = Base::m_correctOrientation * Scalar(2) * Base::m_a;
-
-    if (curv <= 0) {
-        Base::m_k1 = curv;
-        Base::m_k2 = Scalar(0);
-    }
-    else {
-        Base::m_k1 = Scalar(0);
-        Base::m_k2 = curv;
-    }
-
 }

@@ -49,54 +49,6 @@ public:
     PONCA_FITTING_DECLARE_INIT_ADD_FINALIZE
 
     PONCA_MULTIARCH inline OrientedParabolicCylinderFitImpl getOrientedParabolicCylinderFit() const { return *this; }
-
-    template <typename BaseType>
-    PONCA_MULTIARCH inline void operator += ( const BaseType& _b ){
-        Base::operator+=(_b);
-        const auto & orientedPara = _b.getOrientedParabolicCylinderFit();
-        m_sumN2D += orientedPara.m_sumN2D;
-        m_sumP2D += orientedPara.m_sumP2D;
-        m_sumDotPN2D += orientedPara.m_sumDotPN2D;
-        m_sumDotPP2D += orientedPara.m_sumDotPP2D;
-        m_prodPP2D += orientedPara.m_prodPP2D;
-        m_prodPN2D += orientedPara.m_prodPN2D;
-        m_sumH += orientedPara.m_sumH;
-    }
-
-    template <typename BaseType>
-    PONCA_MULTIARCH inline void operator -= ( const BaseType& _b ){
-        Base::operator-=(_b);
-        const auto & orientedPara = _b.getOrientedParabolicCylinderFit();
-        m_sumN2D -= orientedPara.m_sumN2D;
-        m_sumP2D -= orientedPara.m_sumP2D;
-        m_sumDotPN2D -= orientedPara.m_sumDotPN2D;
-        m_sumDotPP2D -= orientedPara.m_sumDotPP2D;
-        m_prodPP2D -= orientedPara.m_prodPP2D;
-        m_prodPN2D -= orientedPara.m_prodPN2D;
-        m_sumH -= orientedPara.m_sumH;
-    }
-
-    PONCA_MULTIARCH inline void operator *= ( const Scalar& _s ){
-        Base::operator*=(_s);
-        m_sumN2D *= _s;
-        m_sumP2D *= _s;
-        m_sumDotPN2D *= _s;
-        m_sumDotPP2D *= _s;
-        m_prodPP2D *= _s;
-        m_prodPN2D *= _s;
-        m_sumH *= _s;
-    }
-
-    PONCA_MULTIARCH inline void operator /= ( const Scalar& _s ){
-        Base::operator/=(_s);
-        m_sumN2D /= _s;
-        m_sumP2D /= _s;
-        m_sumDotPN2D /= _s;
-        m_sumDotPP2D /= _s;
-        m_prodPP2D /= _s;
-        m_prodPN2D /= _s;
-        m_sumH /= _s;
-    }
     
 private:
 
@@ -106,20 +58,6 @@ private:
     PONCA_MULTIARCH inline void    m_uq_parabolic_fitting    ();
     PONCA_MULTIARCH inline void    m_a_parabolic_fitting     ();
     PONCA_MULTIARCH inline void    m_uc_ul_parabolic_fitting ();
-
-    PONCA_MULTIARCH inline void    m_compute_curvature       ();
-
-    PONCA_MULTIARCH inline void    correct_orientation       (){
-
-        VectorType n2D = VectorType(1, m_sumN2D(0), m_sumN2D(1));
-        VectorType n_sum = Base::template localFrameToWorld<true>(n2D);
-        if (Base::m_sumN.dot(n_sum) < 0) {
-            Base::m_correctOrientation = Scalar(-1);
-        }
-
-    }
-    
-
 
 }; //class OrientedParabolicCylinderFitImpl
 
@@ -137,18 +75,18 @@ template < class DataPoint, class _WFunctor, typename T>
                                     Ponca::Plane<DataPoint, _WFunctor,
                                         Ponca::PrimitiveBase<DataPoint,_WFunctor,T>>>>>>>>;
 
-// Near oriented PC-MLS   COV + oriented
-template < class DataPoint, class _WFunctor, typename T>
-    using NearOrientedParabolicCylinderFit =
-    Ponca::OrientedParabolicCylinderFitImpl<DataPoint, _WFunctor,
-        Ponca::ParabolicCylinder<DataPoint, _WFunctor,
-            Ponca::CovariancePlaneFitImpl<DataPoint, _WFunctor,
-                Ponca::CovarianceFitBase<DataPoint, _WFunctor,
-                        Ponca::MeanNormal<DataPoint, _WFunctor,
-                            Ponca::MeanPosition<DataPoint, _WFunctor,
-                                Ponca::LocalFrame<DataPoint, _WFunctor,
-                                    Ponca::Plane<DataPoint, _WFunctor,
-                                        Ponca::PrimitiveBase<DataPoint,_WFunctor,T>>>>>>>>>;
+// // Near oriented PC-MLS   COV + oriented
+// template < class DataPoint, class _WFunctor, typename T>
+//     using NearOrientedParabolicCylinderFit =
+//     Ponca::OrientedParabolicCylinderFitImpl<DataPoint, _WFunctor,
+//         Ponca::ParabolicCylinder<DataPoint, _WFunctor,
+//             Ponca::CovariancePlaneFitImpl<DataPoint, _WFunctor,
+//                 Ponca::CovarianceFitBase<DataPoint, _WFunctor,
+//                         Ponca::MeanNormal<DataPoint, _WFunctor,
+//                             Ponca::MeanPosition<DataPoint, _WFunctor,
+//                                 Ponca::LocalFrame<DataPoint, _WFunctor,
+//                                     Ponca::Plane<DataPoint, _WFunctor,
+//                                         Ponca::PrimitiveBase<DataPoint,_WFunctor,T>>>>>>>>>;
 
 //! [ParabolicCylinderFit Definition]
 

@@ -77,7 +77,7 @@ ParabolicCylinderFitImpl<DataPoint, _WFunctor, T>::m_fitting_process () {
     // Base::m_a = Scalar(-1);
 
     // Reorient the plane if mean plane is provided. 
-    Base::correct_orientation();
+    // Base::correct_orientation();
 
     if (Base::m_isCylinder) {
         m_uq_parabolic_fitting();

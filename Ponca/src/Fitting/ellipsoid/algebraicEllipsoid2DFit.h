@@ -70,29 +70,29 @@ template < class DataPoint, class _WFunctor, typename T>
                                         Ponca::Plane<DataPoint, _WFunctor,
                                             Ponca::PrimitiveBase<DataPoint,_WFunctor,T>>>>>>>>>;
 
-// Near oriented PC-MLS   COV + oriented
-template < class DataPoint, class _WFunctor, typename T>
-    using NearOrientedEllipsoid2DFit =
-        Ponca::AlgebraicEllipsoid2DFitImpl<DataPoint, _WFunctor, 
-            Ponca::OrientedParabolicCylinderFitImpl<DataPoint, _WFunctor,
-                Ponca::ParabolicCylinder<DataPoint, _WFunctor,
-                    Ponca::CovariancePlaneFitImpl<DataPoint, _WFunctor,
-                        Ponca::CovarianceFitBase<DataPoint, _WFunctor,
-                            Ponca::MeanNormal<DataPoint, _WFunctor,
-                                Ponca::MeanPosition<DataPoint, _WFunctor,
-                                        Ponca::LocalFrame<DataPoint, _WFunctor,
-                                            Ponca::Plane<DataPoint, _WFunctor,
-                                                Ponca::PrimitiveBase<DataPoint,_WFunctor,T>>>>>>>>>>;
+// // Near oriented PC-MLS   COV + oriented
+// template < class DataPoint, class _WFunctor, typename T>
+//     using NearOrientedEllipsoid2DFit =
+//         Ponca::AlgebraicEllipsoid2DFitImpl<DataPoint, _WFunctor, 
+//             Ponca::OrientedParabolicCylinderFitImpl<DataPoint, _WFunctor,
+//                 Ponca::ParabolicCylinder<DataPoint, _WFunctor,
+//                     Ponca::CovariancePlaneFitImpl<DataPoint, _WFunctor,
+//                         Ponca::CovarianceFitBase<DataPoint, _WFunctor,
+//                             Ponca::MeanNormal<DataPoint, _WFunctor,
+//                                 Ponca::MeanPosition<DataPoint, _WFunctor,
+//                                         Ponca::LocalFrame<DataPoint, _WFunctor,
+//                                             Ponca::Plane<DataPoint, _WFunctor,
+//                                                 Ponca::PrimitiveBase<DataPoint,_WFunctor,T>>>>>>>>>>;
 
 
 template < class DataPoint, class _WFunctor, typename T>
     using BaseEllipsoid2DFit =
         Ponca::AlgebraicEllipsoid2DFitImpl<DataPoint, _WFunctor, 
-    Ponca::ParabolicCylinderFitImpl<DataPoint, _WFunctor,
-            Ponca::ParabolicCylinder<DataPoint, _WFunctor,
-                Ponca::CovariancePlaneFitImpl<DataPoint, _WFunctor,
-                    Ponca::CovarianceFitBase<DataPoint, _WFunctor,
-                        Ponca::MeanPosition<DataPoint, _WFunctor,
+            Ponca::ParabolicCylinderFitImpl<DataPoint, _WFunctor,
+                Ponca::ParabolicCylinder<DataPoint, _WFunctor,
+                    Ponca::CovariancePlaneFitImpl<DataPoint, _WFunctor,
+                        Ponca::CovarianceFitBase<DataPoint, _WFunctor,
+                            Ponca::MeanPosition<DataPoint, _WFunctor,
                                 Ponca::LocalFrame<DataPoint, _WFunctor,
                                     Ponca::Plane<DataPoint, _WFunctor,
                                         Ponca::PrimitiveBase<DataPoint,_WFunctor,T>>>>>>>>>;
@@ -101,11 +101,11 @@ template < class DataPoint, class _WFunctor, typename T>
 template < class DataPoint, class _WFunctor, typename T>
     using BaseOrientedEllipsoid2DFit =
             Ponca::AlgebraicEllipsoid2DFitImpl<DataPoint, _WFunctor, 
-        Ponca::ParabolicCylinderFitImpl<DataPoint, _WFunctor,
-                Ponca::ParabolicCylinder<DataPoint, _WFunctor,
-                    Ponca::MeanPlaneFitImpl<DataPoint, _WFunctor,
-                        Ponca::MeanNormal<DataPoint, _WFunctor,
-                            Ponca::MeanPosition<DataPoint, _WFunctor,
+                Ponca::ParabolicCylinderFitImpl<DataPoint, _WFunctor,
+                    Ponca::ParabolicCylinder<DataPoint, _WFunctor,
+                        Ponca::MeanPlaneFitImpl<DataPoint, _WFunctor,
+                            Ponca::MeanNormal<DataPoint, _WFunctor,
+                                Ponca::MeanPosition<DataPoint, _WFunctor,
                                     Ponca::LocalFrame<DataPoint, _WFunctor,
                                         Ponca::Plane<DataPoint, _WFunctor,
                                             Ponca::PrimitiveBase<DataPoint,_WFunctor,T>>>>>>>>>;

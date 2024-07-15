@@ -51,19 +51,19 @@ SphereFitImpl<DataPoint, _WFunctor, T>::finalize ()
     else
         Base::m_eCurrentState = Base::getNumNeighbors() < 2*DataPoint::Dim ? UNSTABLE : STABLE;
 
-    MatrixA matC;
-    matC.setIdentity();
-    matC.template topRightCorner<1,1>()    << -2;
-    matC.template bottomLeftCorner<1,1>()  << -2;
-    matC.template topLeftCorner<1,1>()     << 0;
-    matC.template bottomRightCorner<1,1>() << 0;
+    // MatrixA matC;
+    // matC.setIdentity();
+    // matC.template topRightCorner<1,1>()    << -2;
+    // matC.template bottomLeftCorner<1,1>()  << -2;
+    // matC.template topLeftCorner<1,1>()     << 0;
+    // matC.template bottomRightCorner<1,1>() << 0;
 
-    MatrixA invCpratt;
-    invCpratt.setIdentity();
-    invCpratt.template topRightCorner<1,1>()    << -0.5;
-    invCpratt.template bottomLeftCorner<1,1>()  << -0.5;
-    invCpratt.template topLeftCorner<1,1>()     << 0;
-    invCpratt.template bottomRightCorner<1,1>() << 0;
+    // MatrixA invCpratt;
+    // invCpratt.setIdentity();
+    // invCpratt.template topRightCorner<1,1>()    << -0.5;
+    // invCpratt.template bottomLeftCorner<1,1>()  << -0.5;
+    // invCpratt.template topLeftCorner<1,1>()     << 0;
+    // invCpratt.template bottomRightCorner<1,1>() << 0;
 
     // Remarks:
     //   A and C are symmetric so all eigenvalues and eigenvectors are real
@@ -72,9 +72,11 @@ SphereFitImpl<DataPoint, _WFunctor, T>::finalize ()
     //   calling Eigen::GeneralizedEigenSolver on (A,C) and Eigen::EigenSolver on C^{-1}A is equivalent
     //   C is not positive definite so Eigen::GeneralizedSelfAdjointEigenSolver cannot be used
 #ifdef __CUDACC__
-    m_solver.computeDirect(invCpratt * m_matA);
+    m_solver.computeDirect(m_matA);
+    // m_solver.computeDirect(invCpratt * m_matA);
 #else
-    m_solver.compute(invCpratt * m_matA);
+    m_solver.compute(m_matA);
+    // m_solver.compute(invCpratt * m_matA);
 #endif
     VectorA eivals = m_solver.eigenvalues().real();
     m_minId = -1;
@@ -91,7 +93,7 @@ SphereFitImpl<DataPoint, _WFunctor, T>::finalize ()
     Base::m_ul = vecU.template segment<DataPoint::Dim>(1);
     Base::m_uc = vecU[0];
 
-    Base::m_isNormalized = true;
+    Base::m_isNormalized = false;
 
     return Base::m_eCurrentState;
 }
@@ -233,3 +235,4 @@ SphereFitDerImpl<DataPoint, _WFunctor, DiffType, T>::dNormal() const
     Scalar norm3 = norm*norm*norm;
     return dgrad / norm - Base::m_ul * (Base::m_ul.transpose() * dgrad) / norm3;
 }
+

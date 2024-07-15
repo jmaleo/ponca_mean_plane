@@ -159,16 +159,11 @@ WaveJets<DataPoint, _WFunctor, T>::m_jet_process(){
     // corrected normal !
     VectorType N = m_P.col(0);
 
-    // m_k1 = Scalar(2) * Scalar(std::real(phi_2_0 + phi_2_p2 + phi_2_m2));
-    // m_k2 = Scalar(2) * Scalar(std::real(phi_2_0 - phi_2_p2 - phi_2_m2));
-
     Scalar twoPhi_2_0 = Scalar(2) * std::real(phi_2_0);
     Scalar fourSqrtPhi2_m2Phi2_p2 = Scalar(4) * std::sqrt(std::real(phi_2_m2 * phi_2_p2));
 
     m_k1 = twoPhi_2_0 - fourSqrtPhi2_m2Phi2_p2;
     m_k2 = twoPhi_2_0 + fourSqrtPhi2_m2Phi2_p2;
-
-    // if(m_k2 < m_k1) std::swap(m_k1, m_k2);
 
     // reset to original scale TODO : check if it's correct with Base::m_w.evalScale()
     m_k1 /= Base::m_w.evalScale();

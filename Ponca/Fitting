@@ -19,6 +19,7 @@
 #include "src/Fitting/plane.h"
 #include "src/Fitting/algebraicSphere.h"
 #include "src/Fitting/localFrame.h"
+#include "src/Fitting/sphereCurvature.h"
 
 #include "src/Fitting/ellipsoid/algebraicEllipsoid.h"
 

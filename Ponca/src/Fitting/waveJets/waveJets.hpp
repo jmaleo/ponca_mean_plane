@@ -152,17 +152,23 @@ WaveJets<DataPoint, _WFunctor, T>::m_jet_process(){
     // std::complex<Scalar> phi_0_0  = Phicorr(0);
     // std::complex<Scalar> phi_1_m1 = Phicorr(1);
     // std::complex<Scalar> phi_1_p1 = Phicorr(2);
-    std::complex<Scalar> phi_2_m2 = Phicorr(3);
-    std::complex<Scalar> phi_2_0  = Phicorr(4);
-    std::complex<Scalar> phi_2_p2 = Phicorr(5);
+    std::complex<Scalar> phi_2_m2 = Scalar(-1) * Phicorr(3);
+    std::complex<Scalar> phi_2_0  = Scalar(-1) * Phicorr(4);
+    std::complex<Scalar> phi_2_p2 = Scalar(-1) * Phicorr(5);
 
     // corrected normal !
     VectorType N = m_P.col(0);
 
-    m_k1 = Scalar(-2) * Scalar(std::real(phi_2_0 + phi_2_p2 + phi_2_m2));
-    m_k2 = Scalar(-2) * Scalar(std::real(phi_2_0 - phi_2_p2 - phi_2_m2));
+    // m_k1 = Scalar(2) * Scalar(std::real(phi_2_0 + phi_2_p2 + phi_2_m2));
+    // m_k2 = Scalar(2) * Scalar(std::real(phi_2_0 - phi_2_p2 - phi_2_m2));
 
-    if(m_k2 < m_k1) std::swap(m_k1, m_k2);
+    Scalar twoPhi_2_0 = Scalar(2) * std::real(phi_2_0);
+    Scalar fourSqrtPhi2_m2Phi2_p2 = Scalar(4) * std::sqrt(std::real(phi_2_m2 * phi_2_p2));
+
+    m_k1 = twoPhi_2_0 - fourSqrtPhi2_m2Phi2_p2;
+    m_k2 = twoPhi_2_0 + fourSqrtPhi2_m2Phi2_p2;
+
+    // if(m_k2 < m_k1) std::swap(m_k1, m_k2);
 
     // reset to original scale TODO : check if it's correct with Base::m_w.evalScale()
     m_k1 /= Base::m_w.evalScale();

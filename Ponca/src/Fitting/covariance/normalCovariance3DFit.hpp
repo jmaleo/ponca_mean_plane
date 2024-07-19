@@ -47,6 +47,9 @@ NormalCovariance3D<DataPoint, _WFunctor, T>::finalize ()
     else {
         m_normal_centroid /= Base::getWeightSum();
         m_cov = ( m_cov / Base::getWeightSum() ) - ( m_normal_centroid * m_normal_centroid.transpose() );
+        // symmetrize the covariance matrix
+        m_cov = (m_cov + m_cov.transpose()) / Scalar(2);
+        
         m_solver.compute(m_cov);
 
         if (m_solver.info() != Eigen::Success) {
@@ -71,25 +74,25 @@ NormalCovariance3D<DataPoint, _WFunctor, T>::GaussianCurvature() const {
 template < class DataPoint, class _WFunctor, typename T>
 typename NormalCovariance3D<DataPoint, _WFunctor, T>::Scalar
 NormalCovariance3D<DataPoint, _WFunctor, T>::kmin() const {
-    return m_solver.eigenvalues()(0);
+    return m_solver.eigenvalues()(1);
 }
 
 template < class DataPoint, class _WFunctor, typename T>
 typename NormalCovariance3D<DataPoint, _WFunctor, T>::Scalar
 NormalCovariance3D<DataPoint, _WFunctor, T>::kmax() const {
-    return m_solver.eigenvalues()(1);
+    return m_solver.eigenvalues()(2);
 }
 
 template < class DataPoint, class _WFunctor, typename T>
 typename NormalCovariance3D<DataPoint, _WFunctor, T>::VectorType
 NormalCovariance3D<DataPoint, _WFunctor, T>::kminDirection() const {
-    VectorType kMinDirection = m_solver.eigenvectors().col(0);
+    VectorType kMinDirection = m_solver.eigenvectors().col(1);
     return kMinDirection;
 }
 
 template < class DataPoint, class _WFunctor, typename T>
 typename NormalCovariance3D<DataPoint, _WFunctor, T>::VectorType
 NormalCovariance3D<DataPoint, _WFunctor, T>::kmaxDirection() const {
-    VectorType kMaxDirection = m_solver.eigenvectors().col(1);
+    VectorType kMaxDirection = m_solver.eigenvectors().col(2);
     return kMaxDirection;
 }

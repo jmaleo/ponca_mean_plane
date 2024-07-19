@@ -36,6 +36,10 @@
 // Fitting
 #include "src/Fitting/dryFit.h"
 #include "src/Fitting/meanPlaneFit.h"
+#include "src/Fitting/covariance/covariance2DFit.h"
+#include "src/Fitting/covariance/normalCovariance2DFit.h"
+#include "src/Fitting/covariance/normalCovariance3DFit.h"
+#include "src/Fitting/covariance/shapeOperator2D.h"
 #include "src/Fitting/covarianceFit.h"
 #include "src/Fitting/covariancePlaneFit.h"
 #include "src/Fitting/covarianceLineFit.h"

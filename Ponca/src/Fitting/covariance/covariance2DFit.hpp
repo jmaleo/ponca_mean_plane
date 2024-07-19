@@ -1,0 +1,104 @@
+
+#include <Eigen/SVD>
+#include <Eigen/Geometry>
+
+template < class DataPoint, class _WFunctor, typename T>
+void
+Covariance2D<DataPoint, _WFunctor, T>::init(const VectorType& _evalPos)
+{
+    Base::init(_evalPos);
+
+    m_planeIsReady = false;
+    m_cov2D.setZero();
+    m_centroid2D.setZero();
+    m_P.setZero();
+}
+
+template < class DataPoint, class _WFunctor, typename T>
+bool
+Covariance2D<DataPoint, _WFunctor, T>::addLocalNeighbor(Scalar w,
+                                                      const VectorType &localQ,
+                                                      const DataPoint &attributes)
+{
+    auto res = Base::addLocalNeighbor(w, localQ, attributes);
+    if(! m_planeIsReady)
+    {
+        return res;
+    }
+    else // base plane is ready, we can now fit the patch
+    {   
+        const Scalar s = Base::normal().dot(localQ);
+        const Vector2 dP_proj = s * m_P.transpose() * localQ;
+
+        m_cov2D += w * dP_proj * dP_proj.transpose();
+        m_centroid2D += w * dP_proj;
+        return true;
+    }
+    return false;
+}
+
+template < class DataPoint, class _WFunctor, typename T>
+FIT_RESULT
+Covariance2D<DataPoint, _WFunctor, T>::finalize ()
+{
+    if (! m_planeIsReady) {
+        FIT_RESULT res = Base::finalize();
+
+        if(res == STABLE) {  // plane is ready
+            setTangentPlane();
+            m_planeIsReady = true;
+            return Base::m_eCurrentState = NEED_OTHER_PASS;
+        }
+        return res;
+    }
+    else {
+        m_centroid2D /= Base::getWeightSum();
+        m_cov2D = ( m_cov2D / Base::getWeightSum() ) - ( m_centroid2D * m_centroid2D.transpose() );
+        m_solver.compute(m_cov2D);
+
+        if (m_solver.info() != Eigen::Success) {
+            return Base::m_eCurrentState = UNDEFINED;
+        }
+        return Base::m_eCurrentState = STABLE;
+    }
+}
+
+template < class DataPoint, class _WFunctor, typename T>
+typename Covariance2D<DataPoint, _WFunctor, T>::Scalar
+Covariance2D<DataPoint, _WFunctor, T>::kMean() const {
+  return ( kmin() + kmax() ) / Scalar(2);
+}
+
+template < class DataPoint, class _WFunctor, typename T>
+typename Covariance2D<DataPoint, _WFunctor, T>::Scalar
+Covariance2D<DataPoint, _WFunctor, T>::GaussianCurvature() const {
+    return kmin() * kmax();
+}
+
+template < class DataPoint, class _WFunctor, typename T>
+typename Covariance2D<DataPoint, _WFunctor, T>::Scalar
+Covariance2D<DataPoint, _WFunctor, T>::kmin() const {
+    return m_solver.eigenvalues()(0);
+}
+
+template < class DataPoint, class _WFunctor, typename T>
+typename Covariance2D<DataPoint, _WFunctor, T>::Scalar
+Covariance2D<DataPoint, _WFunctor, T>::kmax() const {
+    return m_solver.eigenvalues()(1);
+}
+
+template < class DataPoint, class _WFunctor, typename T>
+typename Covariance2D<DataPoint, _WFunctor, T>::VectorType
+Covariance2D<DataPoint, _WFunctor, T>::kminDirection() const {
+    Vector2 dir = m_solver.eigenvectors().col(0);
+    VectorType vmin = VectorType(0, dir(0), dir(1));
+    return Base::template localFrameToWorld<true>(vmin);
+}
+
+template < class DataPoint, class _WFunctor, typename T>
+typename Covariance2D<DataPoint, _WFunctor, T>::VectorType
+Covariance2D<DataPoint, _WFunctor, T>::kmaxDirection() const {
+    Vector2 dir = m_solver.eigenvectors().col(1);
+    VectorType vmax = VectorType(0, dir(0), dir(1));
+    return Base::template localFrameToWorld<true>(vmax);
+}

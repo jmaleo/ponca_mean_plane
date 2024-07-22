@@ -70,13 +70,13 @@ FIT_RESULT ShapeOperator2DFitImpl<DataPoint, _WFunctor, T>::finalize()
     }
     else {
         if(Base::getNumNeighbors() < 3) {
-            std::cout << "ShapeOperator2DFitImpl<DataPoint, _WFunctor, T>::finalize() : Base::finalize() != STABLE  || Base::getNumNeighbors() < 3" << std::endl;
+            std::cout << "Base::getNumNeighbors() < 3" << std::endl;
             return Base::m_eCurrentState = UNSTABLE;
         }
         const bool ok = solve(m_A, m_B, m_W);
         if(not ok) {
             std::cout << "ShapeOperator2DFitImpl<DataPoint, _WFunctor, T>::finalize() : not ok" << std::endl;
-            return Base::m_eCurrentState = STABLE;
+            return Base::m_eCurrentState = UNSTABLE;
         }
         // symmetrize
         m_W(0,1) = m_W(1,0) = (m_W(0,1) + m_W(1,0))/Scalar(2);

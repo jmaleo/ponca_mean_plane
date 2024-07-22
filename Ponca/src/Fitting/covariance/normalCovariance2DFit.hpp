@@ -76,13 +76,23 @@ NormalCovariance2D<DataPoint, _WFunctor, T>::GaussianCurvature() const {
 template < class DataPoint, class _WFunctor, typename T>
 typename NormalCovariance2D<DataPoint, _WFunctor, T>::Scalar
 NormalCovariance2D<DataPoint, _WFunctor, T>::kmin() const {
-    return m_solver.eigenvalues()(0);
+    PONCA_MULTIARCH_STD_MATH(pow);
+    PONCA_MULTIARCH_STD_MATH(sqrt);
+    constexpr Scalar four = Scalar(4);
+    constexpr Scalar PI = Scalar(M_PI);
+    Scalar factor = pow ( Base::m_w.evalScale(), four ) * PI / four;
+    return sqrt( m_solver.eigenvalues()(0) / factor );
 }
 
 template < class DataPoint, class _WFunctor, typename T>
 typename NormalCovariance2D<DataPoint, _WFunctor, T>::Scalar
 NormalCovariance2D<DataPoint, _WFunctor, T>::kmax() const {
-    return m_solver.eigenvalues()(1);
+    PONCA_MULTIARCH_STD_MATH(pow);
+    PONCA_MULTIARCH_STD_MATH(sqrt);
+    constexpr Scalar four = Scalar(4);
+    constexpr Scalar PI = Scalar(M_PI);
+    Scalar factor = pow ( Base::m_w.evalScale(), four ) * PI / four;
+    return sqrt( m_solver.eigenvalues()(1) / factor );
 }
 
 template < class DataPoint, class _WFunctor, typename T>

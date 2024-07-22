@@ -70,7 +70,7 @@ FIT_RESULT ShapeOperator2DFitImpl<DataPoint, _WFunctor, T>::finalize()
     }
     else {
         if(Base::getNumNeighbors() < 3) {
-            std::cout << "Base::getNumNeighbors() < 3" << std::endl;
+            std::cout << "ShapeOperator2DFitImpl<DataPoint, _WFunctor, T>::finalize() : Base::finalize() != STABLE  || Base::getNumNeighbors() < 3" << std::endl;
             return Base::m_eCurrentState = UNSTABLE;
         }
         const bool ok = solve(m_A, m_B, m_W);

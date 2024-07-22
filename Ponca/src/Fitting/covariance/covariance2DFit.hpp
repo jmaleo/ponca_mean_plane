@@ -78,12 +78,19 @@ Covariance2D<DataPoint, _WFunctor, T>::GaussianCurvature() const {
 template < class DataPoint, class _WFunctor, typename T>
 typename Covariance2D<DataPoint, _WFunctor, T>::Scalar
 Covariance2D<DataPoint, _WFunctor, T>::kmin() const {
-    return m_solver.eigenvalues()(0);
+    PONCA_MULTIARCH_STD_MATH(pow);
+    constexpr Scalar two_fixe_six = Scalar(256);
+    constexpr Scalar PIstd = Scalar(M_PI);
+    return two_fixe_six * m_solver.eigenvalues()(0) / ( PIstd * pow(Base::m_w.evalScale(), Scalar(8) ) );
 }
 
 template < class DataPoint, class _WFunctor, typename T>
 typename Covariance2D<DataPoint, _WFunctor, T>::Scalar
 Covariance2D<DataPoint, _WFunctor, T>::kmax() const {
+    PONCA_MULTIARCH_STD_MATH(pow);
+    constexpr Scalar two_fixe_six = Scalar(256);
+    constexpr Scalar PIstd = Scalar(M_PI);
+    return two_fixe_six * m_solver.eigenvalues()(1) / ( PIstd * pow(Base::m_w.evalScale(), Scalar(8) ) );
     return m_solver.eigenvalues()(1);
 }
 

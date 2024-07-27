@@ -48,6 +48,8 @@
 #include "src/Fitting/sphereFit.h"
 #include "src/Fitting/orientedSphereFit.h"
 
+#include "src/Fitting/pss/PointSetSurfaces.h"
+
 #include "src/Fitting/ellipsoid/orientedEllipsoidFit.h"
 #include "src/Fitting/ellipsoid/algebraicEllipsoid2DFit.h"
 

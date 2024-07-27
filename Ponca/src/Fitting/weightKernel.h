@@ -194,5 +194,23 @@ public:
     static constexpr bool isDDValid = false;
 };//class CompactExpWeightKernel
 
+template <typename _Scalar>
+class ExponentialWeightKernel
+{
+public:
+    /*! \brief Scalar type defined outside the class*/
+    typedef _Scalar Scalar;
+
+    PONCA_MULTIARCH inline Scalar f  (const Scalar& _x) const { return std::exp( ( -_x*_x ) / Scalar(0.2) );}
+
+    PONCA_MULTIARCH inline Scalar df (const Scalar& _x) const { return Scalar(-2 / 0.2)*_x*std::exp( ( -_x*_x ) / Scalar(0.2) ); }
+
+    PONCA_MULTIARCH inline Scalar ddf(const Scalar& _x) const { return Scalar(-2 / 0.2) * f(_x ) + Scalar(-2 / 0.2) * _x * df ( _x ); }
+
+    //! \brief #df is defined and valid on the definition interval
+    static constexpr bool isDValid = true;
+    //! \brief #ddf is not defined and valid on the definition interval
+    static constexpr bool isDDValid = true;
+};//class CompactExpWeightKernel
 
 }// namespace Ponca

@@ -29,6 +29,9 @@
 
 #include "src/Fitting/varifold.h"
 
+#include "src/Fitting/implicitParametric/quadric.h"
+#include "src/Fitting/implicitParametric/quadricFit.h"
+
 
 // Fitting tools
 #include "src/Fitting/mean.h"
@@ -41,6 +44,7 @@
 #include "src/Fitting/covariance/normalCovariance2DFit.h"
 #include "src/Fitting/covariance/normalCovariance3DFit.h"
 #include "src/Fitting/covariance/shapeOperator2D.h"
+#include "src/Fitting/covariance/normalW.h"
 #include "src/Fitting/covarianceFit.h"
 #include "src/Fitting/covariancePlaneFit.h"
 #include "src/Fitting/covarianceLineFit.h"

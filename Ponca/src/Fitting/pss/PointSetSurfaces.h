@@ -4,6 +4,7 @@
 #include "./../plane.h" 
 
 #include <Eigen/Dense>
+#include <unsupported/Eigen/CXX11/Tensor>
 
 namespace Ponca
 {
@@ -18,15 +19,21 @@ class PointSetSurfaceFitImpl : public T
 {
     PONCA_FITTING_DECLARE_DEFAULT_TYPES
     PONCA_FITTING_DECLARE_MATRIX_TYPE
+    using Matrix44 = Eigen::Matrix<Scalar,4,4>;
     using Matrix33 = Eigen::Matrix<Scalar,3,3>;
     using Matrix32 = Eigen::Matrix<Scalar,3,2>;
     using Matrix22 = Eigen::Matrix<Scalar,2,2>;
     using Vector3 = Eigen::Matrix<Scalar,3,1>;
     using Vector2 = Eigen::Matrix<Scalar,2,1>;
+    using Row3 = Eigen::Matrix<Scalar,1,3>;
+    using Tensor333 = Eigen::TensorFixedSize<Scalar,Eigen::Sizes<3,3,3>>;
 
     enum { check = Base::PROVIDES_PLANE };
     static_assert(DataPoint::Dim == 3); // only valid in 3D
     // static_assert(std::is_same<_WFunctor, DistWeightFunc<DataPoint,PointSetSurfaceWeightKernel<Scalar>>>());
+
+    Scalar H() const;
+    Scalar K() const;
 
 public:
     // 1st step computation data
@@ -34,15 +41,15 @@ public:
     Vector3 m_sum_n;
     Vector3 m_sum_p;
     Matrix33 m_sum_dn;
-    Matrix33 m_sum_d2n[3];
+    Tensor333 m_sum_d2n;
 
     // 1st step results
     Vector3 m_n;
     Matrix33 m_dn;
-    Matrix33 m_d2n[3];
+    Tensor333 m_d2n;
 
     // 2nd step computation data
-    Vector3  m_grad;
+    Row3  m_grad;
     Matrix33 m_hess;
 
     // 2nd step results
@@ -60,10 +67,10 @@ public:
     PONCA_FITTING_DECLARE_INIT_ADD_FINALIZE
 
     //! \brief Returns an estimate of the mean curvature
-    PONCA_MULTIARCH inline Scalar kMean() const { return (m_kmin + m_kmax) / Scalar(2); }
+    PONCA_MULTIARCH inline Scalar kMean() const { return H(); }
 
     //! \brief Returns an estimate of the Gaussian curvature
-    PONCA_MULTIARCH inline Scalar GaussianCurvature() const { return m_kmin * m_kmax; }
+    PONCA_MULTIARCH inline Scalar GaussianCurvature() const { return K(); }
 
     //! \brief Returns an estimate of the minimum curvature
     PONCA_MULTIARCH inline Scalar kmin() const { return m_kmin; }
@@ -95,31 +102,30 @@ void PointSetSurfaceFitImpl<DataPoint, _WFunctor, T>::init(const VectorType& poi
 
     // 1st step computation data
     m_sum_w = 0;
-    m_sum_n = Vector3::Zero();
-    m_sum_p = Vector3::Zero();
-    m_sum_dn = Matrix33::Zero();
-    for(int i = 0; i < 3; ++i)
-        m_sum_d2n[i] = Matrix33::Zero();
+    m_sum_n.setZero();
+    m_sum_p.setZero();
+    m_sum_dn.setZero();
+    m_sum_d2n.setZero();
 
     // 1st step results
-    m_n = Vector3::Zero();
-    m_dn = Matrix33::Zero();
-    for(int i = 0; i < 3; ++i)
-        m_d2n[i] = Matrix33::Zero();
+    m_n.setZero();
+    m_dn.setZero();
+    m_d2n.setZero();
 
     // 2nd step computation data
-    m_grad = Vector3::Zero();
-    m_hess = Matrix33::Zero();
+    m_grad.setZero();
+    m_hess.setZero();
 
     // 2nd step results
-    m_W = Matrix22::Zero();
+    m_W.setZero();
     m_kmin = 0;
     m_kmax = 0;
-    m_dmin = Vector3::Zero();
-    m_dmax = Vector3::Zero();
+    m_dmin.setZero();
+    m_dmax.setZero();
 
     m_first_step = true;
 }
+
 
 template < class DataPoint, class _WFunctor, typename T >
 bool PointSetSurfaceFitImpl<DataPoint, _WFunctor, T>::addLocalNeighbor(
@@ -129,14 +135,16 @@ bool PointSetSurfaceFitImpl<DataPoint, _WFunctor, T>::addLocalNeighbor(
     {
         if(m_first_step)
         {
-            const Vector3 dw = Base::m_w.spacedw(attributes.pos(), attributes);
-            const Matrix33 d2w = Base::m_w.spaced2w(attributes.pos(), attributes);
+            const Row3 dw = Base::m_w.spacedw(attributes.pos(), attributes).transpose();
+            const Matrix33 d2w = Base::m_w.spaced2w(attributes.pos(), attributes); // symmetric
             m_sum_w += w;
             m_sum_p += w * localQ;
             m_sum_n += w * attributes.normal();
-            m_sum_dn += attributes.normal() * dw.transpose();
+            m_sum_dn += attributes.normal() * dw;
             for(int i = 0; i < 3; ++i)
-                m_sum_d2n[i] += d2w * attributes.normal()[i];
+            for(int j = 0; j < 3; ++j)
+            for(int k = 0; k < 3; ++k)
+                m_sum_d2n(i,j,k) += attributes.normal()[i] * d2w(k,j);
         }
         else
         {
@@ -148,26 +156,28 @@ bool PointSetSurfaceFitImpl<DataPoint, _WFunctor, T>::addLocalNeighbor(
             const Vector3 C = -localQ;
             const Vector3 D = m_n + m_dn.transpose() * C;
 
-            const Vector3 dA = -2.0/h2 * A * C;
-            const Vector3 dB = m_n + m_dn.transpose() * C;
+            const Row3 dA = -2.0/h2 * A * C.transpose();
+            const Row3 dB = m_n.transpose() + C.transpose() * m_dn;
             const Matrix33 dC = Matrix33::Identity();
             Matrix33 dD = m_dn + m_dn.transpose();
             for(int i = 0; i < 3; ++i)
-                dD += C[i] * m_d2n[i];
+            for(int j = 0; j < 3; ++j)
+            for(int k = 0; k < 3; ++k)
+                dD(i,j) += C[k] * m_d2n(k,i,j);
 
             const Scalar E = 2.0/h2*B * (1.0/h2*B*B - 1.0);
             const Scalar F = (1.0 - 3.0/h2*B*B);
-            const Vector3 dE = 2.0/h2 * (3.0/h2 * B*B - 1.0) * dB;
-            const Vector3 dF = -6.0/h2 * B * dB;
+            const Row3 dE = 2.0/h2 * (3.0/h2 * B*B - 1.0) * dB;
+            const Row3 dF = -6.0/h2 * B * dB;
 
-            m_grad += 2 * A * (E * C + F * D);
+            m_grad += 2 * A * (E * C.transpose() + F * D.transpose());
             m_hess += 2 * (
-                (E*C + F*D) * dA.transpose()
+                (E*C + F*D) * dA
                 + A * (
                     E * dC +
-                    C * dE.transpose() +
+                    C * dE +
                     F * dD +
-                    D * dF.transpose()
+                    D * dF
                 ));
         }
         return true;
@@ -184,23 +194,31 @@ FIT_RESULT PointSetSurfaceFitImpl<DataPoint, _WFunctor, T>::finalize()
 
     if(m_first_step)
     {
-        m_n = m_sum_n.normalized();
-        m_dn = (Matrix33::Identity() - m_n*m_n.transpose()) * m_sum_dn / m_sum_n.norm();
+        const Scalar d = m_sum_n.norm();
 
-        const Scalar G = 1.0 / m_sum_n.norm();
-        const Scalar H = 1.0 / (m_sum_n.norm() * m_sum_n.norm());
-        const Vector3 dG = - 1.0 / std::pow(m_sum_n.norm(),3) * m_sum_dn.transpose() * m_sum_n;
-        const Vector3 dH = - 2.0 / std::pow(m_sum_n.norm(),4) * m_sum_dn.transpose() * m_sum_n;
+        m_n = m_sum_n / d;
+        m_dn = (Matrix33::Identity() - m_n*m_n.transpose()) * m_sum_dn / d;
 
-        for(int i = 0; i < 3; ++i)
+        const Scalar G = 1.0 / d;
+        const Row3 dG = - 1.0 / (d*d*d) * m_sum_n.transpose() * m_sum_dn;
+ 
+        for(int k = 0; k < 3; ++k)
         {
-            m_d2n[i] = dG[i] * (Matrix33::Identity() - m_n*m_n.transpose()) * m_sum_dn 
-                - (
-                    dH[i] * m_sum_n*m_sum_n.transpose()
-                    + H * m_sum_dn.col(i) * m_sum_n.transpose()
-                    + H * m_sum_n * m_sum_dn.col(i).transpose()
-                  ) * m_sum_dn
-                + G * (Matrix33::Identity() - m_n*m_n.transpose()) * m_d2n[i];
+            Matrix33 sum_d2n_k = Matrix33::Zero();
+            for(int i = 0; i < 3; ++i)
+            for(int j = 0; j < 3; ++j)
+                sum_d2n_k(i,j) = m_sum_d2n(i,j,k);
+
+            const Matrix33 d2n_k = dG[k] * (Matrix33::Identity() - m_n*m_n.transpose()) * m_sum_dn 
+                 - G * (
+                     m_dn.col(k) * m_n.transpose()
+                     + m_n * m_dn.col(k).transpose()
+                   ) * m_sum_dn;
+                 + G * (Matrix33::Identity() - m_n*m_n.transpose()) * sum_d2n_k;
+
+            for(int i = 0; i < 3; ++i)
+            for(int j = 0; j < 3; ++j)
+                m_d2n(i,j,k) = d2n_k(i,j);
         }
 
         Base::setPlane(m_n, m_sum_p/m_sum_w);
@@ -211,7 +229,7 @@ FIT_RESULT PointSetSurfaceFitImpl<DataPoint, _WFunctor, T>::finalize()
     else
     {
         const Matrix33 W3D = m_hess / m_grad.norm();
-        const Matrix32 P = tangentPlane(m_grad.normalized());
+        const Matrix32 P = tangentPlane(m_grad.transpose().normalized());
         Matrix22 W = P.transpose() * W3D * P;
 
         // symmetrize
@@ -254,6 +272,27 @@ PointSetSurfaceFitImpl<DataPoint, _WFunctor, T>::tangentPlane(const VectorType& 
     B.col(0).normalize();
     B.col(1) = B.col(0).cross(n);
     return B;
+}
+
+template < class DataPoint, class _WFunctor, typename T >
+typename PointSetSurfaceFitImpl<DataPoint, _WFunctor, T>::Scalar 
+PointSetSurfaceFitImpl<DataPoint, _WFunctor, T>::H() const
+{
+    const Scalar norm_grad = m_grad.norm();
+    return (m_grad * m_hess * m_grad.transpose() - norm_grad*norm_grad * m_hess.trace()) / std::pow(norm_grad, 3) / 2;
+}
+
+template < class DataPoint, class _WFunctor, typename T >
+typename PointSetSurfaceFitImpl<DataPoint, _WFunctor, T>::Scalar 
+PointSetSurfaceFitImpl<DataPoint, _WFunctor, T>::K() const
+{
+    Matrix44 M;
+    M.template block<3,3>(0,0) = m_hess;
+    M.template block<3,1>(0,3) = m_grad.transpose();
+    M.template block<1,3>(3,0) = m_grad;
+    M(3,3) = 0.0;
+    const Scalar norm_grad = m_grad.norm();
+    return - M.determinant() / std::pow(norm_grad, 4);
 }
 
 } //namespace Ponca

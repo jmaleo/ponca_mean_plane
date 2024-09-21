@@ -34,6 +34,7 @@ protected:
 public:
     using SampleMatrix = Eigen::Matrix<Scalar,Eigen::Dynamic,Eigen::Dynamic>;
     using Vector6      = Eigen::Matrix<Scalar,6,1>;
+    using Vector2      = Eigen::Matrix<Scalar,2,1>;
 
 protected:
     SampleMatrix m_A; /*!< \brief Quadric input samples */
@@ -65,6 +66,20 @@ public:
 
     PONCA_MULTIARCH inline Scalar evalUV(Scalar u, Scalar v) const {
       return h_uu()*u*u + h_vv()*v*v + h_uv()*u*v + h_u()*u + h_v()*v + h_c();
+    }
+
+    PONCA_MULTIARCH inline Vector2 evaldUV(Scalar u, Scalar v) const {
+      return Vector2( Scalar(2) * h_uu()*u + h_uv()*v + h_u(), 
+                        Scalar(2) * h_vv()*v + h_uv()*u + h_v() );
+    }
+
+    //! \brief Approximation of the scalar field gradient at \f$ \mathbf{q} \f$
+    PONCA_MULTIARCH inline VectorType primitiveGradient (const VectorType& _q) const;
+
+    /*! \brief Approximation of the scalar field gradient at the evaluation point */
+    PONCA_MULTIARCH inline VectorType primitiveGradient () const {
+        VectorType n = primitiveGradient( Base::m_w.basisCenter() );
+        return n / n.norm();
     }
 
     /*! \brief Value of the scalar field at the evaluation point */

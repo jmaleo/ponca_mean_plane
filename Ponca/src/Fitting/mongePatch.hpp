@@ -70,6 +70,17 @@ MongePatch<DataPoint, _WFunctor, T>::finalize ()
 }
 
 template < class DataPoint, class _WFunctor, typename T>
+typename MongePatch<DataPoint, _WFunctor, T>::VectorType
+MongePatch<DataPoint, _WFunctor, T>::primitiveGradient( const VectorType& _q ) const
+{
+    VectorType proj = Base::worldToLocalFrame(_q);
+    Vector2 df = evaldUV(proj(1), proj(2));
+    VectorType local_gradient { 1, df(0) , df(1) };
+    VectorType world_gradient = Base::template localFrameToWorld<true>(local_gradient);
+    return world_gradient;
+}
+
+template < class DataPoint, class _WFunctor, typename T>
 typename MongePatch<DataPoint, _WFunctor, T>::Scalar
 MongePatch<DataPoint, _WFunctor, T>::kMean() const {
   PONCA_MULTIARCH_STD_MATH(pow);

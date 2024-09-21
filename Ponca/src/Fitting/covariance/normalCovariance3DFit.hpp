@@ -12,42 +12,9 @@ NormalCovariance3D<DataPoint, _WFunctor, T>::init(const VectorType& _evalPos)
     m_normal_centroid.setZero();
     m_minDirIndex = 0;
     m_maxDirIndex = 0;
-}
 
-// findNormalDirection
-template < class DataPoint, class _WFunctor, typename T>
-void
-NormalCovariance3D<DataPoint, _WFunctor, T>::findMinDirection(){
-
-    // normal
-    VectorType n = Base::normal();
-
-    // find the smallest angle between the normal and the 2 firsts eigenvectors
-    Scalar minAngle = Scalar(2) * Scalar(M_PI);
-    Scalar maxAngle = Scalar(0);
-    int minIndex = -1;
-    int maxIndex = -1;
- 
-    for(int i = 0; i < 3; i++){
-        Scalar dot_prod = m_solver.eigenvectors().col(i).dot ( n );
-        if ( dot_prod < 0. ){
-            dot_prod = m_solver.eigenvectors().col(i).dot ( -n );
-        }
-        dot_prod = ( dot_prod > 1. ) ? 1 : dot_prod;
-        dot_prod = ( dot_prod < -1. ) ? 1 : dot_prod;
-
-        Scalar angle = std::acos( dot_prod / ( m_solver.eigenvectors().col(i).norm() * n.norm() ) );
-        if(angle <= minAngle){
-            minAngle = angle;
-            minIndex = i;
-        }
-        if(angle >= maxAngle){
-            maxAngle = angle;
-            maxIndex = i;
-        }
-    }
-    m_minDirIndex = 3 - minIndex - maxIndex;
-    m_maxDirIndex = maxIndex;
+    m_P.setZero();
+    m_W.setZero();
 }
 
 template < class DataPoint, class _WFunctor, typename T>
@@ -80,14 +47,13 @@ NormalCovariance3D<DataPoint, _WFunctor, T>::finalize ()
         m_normal_centroid /= Base::getWeightSum();
         m_cov = ( m_cov / Base::getWeightSum() ) - ( m_normal_centroid * m_normal_centroid.transpose() );
         // m_cov = (m_cov + m_cov.transpose()) / Scalar(2);
-        
-        m_solver.compute(m_cov);
+        setTangentPlane();
+        m_W = m_P.transpose() * m_cov * m_P;
+        m_solver.compute(m_W);
 
         if (m_solver.info() != Eigen::Success) {
             return Base::m_eCurrentState = UNDEFINED;
         }
-
-        findMinDirection();
         
         return Base::m_eCurrentState = STABLE;
     }
@@ -113,7 +79,7 @@ NormalCovariance3D<DataPoint, _WFunctor, T>::kmin() const {
     constexpr Scalar four = Scalar(4);
     constexpr Scalar PI = Scalar(M_PI);
     Scalar factor = pow ( Base::m_w.evalScale(), four ) * PI / four;
-    return sqrt( m_solver.eigenvalues()(m_minDirIndex) / factor );
+    return sqrt( m_solver.eigenvalues()(0) / factor );
 }
 
 template < class DataPoint, class _WFunctor, typename T>
@@ -124,19 +90,19 @@ NormalCovariance3D<DataPoint, _WFunctor, T>::kmax() const {
     constexpr Scalar four = Scalar(4);
     constexpr Scalar PI = Scalar(M_PI);
     Scalar factor = pow ( Base::m_w.evalScale(), four ) * PI / four;
-    return sqrt( m_solver.eigenvalues()(m_maxDirIndex) / factor );
+    return sqrt( m_solver.eigenvalues()(1) / factor );
 }
 
 template < class DataPoint, class _WFunctor, typename T>
 typename NormalCovariance3D<DataPoint, _WFunctor, T>::VectorType
 NormalCovariance3D<DataPoint, _WFunctor, T>::kminDirection() const {
-    VectorType kMinDirection = m_solver.eigenvectors().col(m_minDirIndex);
+    VectorType kMinDirection = m_P * m_solver.eigenvectors().col(0);
     return kMinDirection;
 }
 
 template < class DataPoint, class _WFunctor, typename T>
 typename NormalCovariance3D<DataPoint, _WFunctor, T>::VectorType
 NormalCovariance3D<DataPoint, _WFunctor, T>::kmaxDirection() const {
-    VectorType kMaxDirection = m_solver.eigenvectors().col(m_maxDirIndex);
+    VectorType kMaxDirection = m_P * m_solver.eigenvectors().col(1);
     return kMaxDirection;
 }

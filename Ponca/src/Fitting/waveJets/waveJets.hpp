@@ -134,46 +134,30 @@ WaveJets<DataPoint, _WFunctor, T>::m_jet_process(){
     
     Eigen::Matrix<std::complex<Scalar>, Eigen::Dynamic, 1> Phicorr = m_M.colPivHouseholderQr().solve(m_b);
 
-    // % compute real(a0) and |an| n>=1
-    //    idx = 1;
-    //    an=zeros(order+1,1);
-    //    for k=0:order
-    //        for n = -k:2:k
-    //          if n>=0
-    //           an(n+1) = an(n+1) + Phicorr(idx)/(k+2);
-    //          end
-    //          idx=idx+1;
-    //        end
-    //    end
-    //    an(1)=real(an(1));%imaginary part is 0
-    //    an(2:end)=abs(an(2:end));
-
-
-    // std::complex<Scalar> phi_0_0  = Phicorr(0);
-    // std::complex<Scalar> phi_1_m1 = Phicorr(1);
-    // std::complex<Scalar> phi_1_p1 = Phicorr(2);
+    std::complex<Scalar> phi_0_0  = Phicorr(0);
+    std::complex<Scalar> phi_1_m1 = Phicorr(1);
+    std::complex<Scalar> phi_1_p1 = Phicorr(2);
     std::complex<Scalar> phi_2_m2 = Scalar(-1) * Phicorr(3);
     std::complex<Scalar> phi_2_0  = Scalar(-1) * Phicorr(4);
     std::complex<Scalar> phi_2_p2 = Scalar(-1) * Phicorr(5);
 
-    // corrected normal !
     VectorType N = m_P.col(0);
 
-    Scalar twoPhi_2_0 = Scalar(2) * std::real(phi_2_0);
-    Scalar fourSqrtPhi2_m2Phi2_p2 = Scalar(4) * std::sqrt(std::real(phi_2_m2 * phi_2_p2));
+    Scalar m_K = Scalar(4) * pow( std::real(phi_2_0), Scalar(2) ) - Scalar(16) * std::real(phi_2_m2 * phi_2_p2);
+    m_K /= pow( Scalar(4) * std::real(phi_1_m1 * phi_1_p1) + Scalar(1), Scalar(2) );
 
-    m_k1 = twoPhi_2_0 - fourSqrtPhi2_m2Phi2_p2;
-    m_k2 = twoPhi_2_0 + fourSqrtPhi2_m2Phi2_p2;
+    Scalar m_H = Scalar(2) * std::real(phi_2_0) * ( Scalar(1)  + Scalar(4) * std::real(phi_1_m1 * phi_1_p1) ) 
+        + Scalar(4) * std::real(phi_2_m2 * pow( phi_1_p1, Scalar(2) ) )
+        + Scalar(4) * std::real(phi_2_p2 * pow( phi_1_m1, Scalar(2) ) );
+    m_H /= pow ( Scalar(4) * std::real(phi_1_m1 * phi_1_p1) + Scalar(1), Scalar( Scalar( 3 ) / Scalar( 2 ) ) );
 
-    // reset to original scale TODO : check if it's correct with Base::m_w.evalScale()
+    m_k1 = m_H - std::sqrt( m_H * m_H - m_K );
+    m_k2 = m_H + std::sqrt( m_H * m_H - m_K );
     m_k1 /= Base::m_w.evalScale();
     m_k2 /= Base::m_w.evalScale();
-
-    // The signal contains a constant component (phi_2_0) and a component that oscillates two times and whose maximum is aligned with the first principal curvature direction (corresponding to the phase of phi_2_p2).
-    Scalar theta = std::arg(phi_2_p2);
-    m_v1 = std::cos(theta) * m_P.col(1) + std::sin(theta) * m_P.col(2);
-    m_v1 = m_v1.normalized();
-    m_v2 = N.cross(m_v1).normalized();
-
+    
+    Scalar phase = std::arg(phi_2_p2);
+    m_v2 = m_P.col(1) * std::cos(phase) + m_P.col(2) * std::sin(phase); 
+    m_v1 = m_P.col(0).cross(m_v2);
     return Base::m_eCurrentState = STABLE;
 }

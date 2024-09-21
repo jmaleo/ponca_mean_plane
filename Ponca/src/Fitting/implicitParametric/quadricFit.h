@@ -54,7 +54,7 @@ public:
 
 protected:
 
-    static Matrix32 tangentPlane(const VectorType& n);
+    PONCA_MULTIARCH Matrix32 tangentPlane(const VectorType& n);
 
 }; //class Quadric
 
@@ -62,7 +62,8 @@ template < class DataPoint, class _WFunctor, typename T>
 using QuadricFit = 
     QuadricFitImpl<DataPoint, _WFunctor, 
         Quadric<DataPoint, _WFunctor,
-            Ponca::PrimitiveBase<DataPoint,_WFunctor,T>>>;
+            Ponca::LocalFrame<DataPoint, _WFunctor,
+                Ponca::PrimitiveBase<DataPoint,_WFunctor,T>>>>;
 
 
 #include "quadricFit.hpp"

@@ -95,6 +95,14 @@ public:
     //! \brief Returns an estimate of the maximum curvature direction
     PONCA_MULTIARCH inline VectorType kmaxDirection() const { return m_dmax; }
 
+    PONCA_MULTIARCH inline VectorType primitiveGradient() const {
+        VectorType covNormal = Base::primitiveGradient();
+        VectorType meanNormal = Base::meanNormalVector();
+        if (covNormal.dot(meanNormal) < Scalar(0))
+            covNormal *= Scalar(-1);
+        return covNormal;
+    }
+
 protected:
     // Solve X A = B 
     // by inverting A
@@ -108,12 +116,14 @@ protected:
 template < class DataPoint, class _WFunctor, typename T>
 using ShapeOperator2DFit =
     ShapeOperator2DFitImpl<DataPoint, _WFunctor, 
-        Ponca::MeanPlaneFitImpl<DataPoint, _WFunctor,
-            Ponca::MeanNormal<DataPoint, _WFunctor,
-                Ponca::MeanPosition<DataPoint, _WFunctor,
-                    Ponca::LocalFrame<DataPoint, _WFunctor,
-                        Ponca::Plane<DataPoint, _WFunctor,
-                            Ponca::PrimitiveBase<DataPoint,_WFunctor,T>>>>>>>;
+        Ponca::CovariancePlaneFitImpl<DataPoint, _WFunctor,
+            Ponca::CovarianceFitBase<DataPoint, _WFunctor,
+        // Ponca::MeanPlaneFitImpl<DataPoint, _WFunctor,
+                Ponca::MeanNormal<DataPoint, _WFunctor,
+                    Ponca::MeanPosition<DataPoint, _WFunctor,
+                        Ponca::LocalFrame<DataPoint, _WFunctor,
+                            Ponca::Plane<DataPoint, _WFunctor,
+                                Ponca::PrimitiveBase<DataPoint,_WFunctor,T>>>>>>>>;
 
 
 #include "shapeOperator2D.hpp"

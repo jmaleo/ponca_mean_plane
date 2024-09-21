@@ -89,6 +89,13 @@ public:
         return h_c() + h_u()*q1 + h_v()*q2 + m_a * ( h_uu() * q1 * q1 + h_vv() * q2 * q2 + Scalar(2) * h_uv() * q1 * q2 );
     }
 
+    PONCA_MULTIARCH inline Vector2 evaldUV(Scalar q1, Scalar q2) const {
+        std::cout << "m_a: " << m_a << std::endl;
+    //   h_c() + h_u()*q1 + h_v()*q2 + m_a * ( h_uu() * q1 * q1 + h_vv() * q2 * q2 + Scalar(2) * h_uv() * q1 * q2 );
+      return Vector2( h_u() + Scalar(2) * m_a * ( h_uu() * q1 +  h_uv() * q2 ),
+                      h_v() + Scalar(2) * m_a * ( h_vv() * q2  +  h_uv() * q1 ) );
+    }
+
     //! \brief Make the primitive fitting to be a demi-ellipsoid instead of a parabolic cylinder
     PONCA_MULTIARCH inline void setCylinder(bool b) { m_isCylinder = b; }
 

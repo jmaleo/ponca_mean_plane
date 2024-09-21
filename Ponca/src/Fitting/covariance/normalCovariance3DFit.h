@@ -23,7 +23,9 @@ protected:
     enum { Check = Base::PROVIDES_LOCAL_FRAME };
 
 public:
-    using Solver = Eigen::SelfAdjointEigenSolver<MatrixType>;
+    using Matrix32 = Eigen::Matrix<Scalar, 3, 2>;
+    using Matrix22 = Eigen::Matrix<Scalar, 2, 2>;
+    using Solver = Eigen::SelfAdjointEigenSolver<Matrix22>;
 protected:
 
     MatrixType   m_cov;      /*!< \brief Covariance matrix */
@@ -32,6 +34,10 @@ protected:
     bool         m_planeIsReady = false;
     int          m_minDirIndex = 0;
     int          m_maxDirIndex = 0;
+    int          m_normalIndex = 0;
+
+    Matrix32     m_P;
+    Matrix22     m_W;
 
 public:
     PONCA_EXPLICIT_CAST_OPERATORS(NormalCovariance3D,normalCovariance3D)
@@ -63,12 +69,20 @@ public:
 
     PONCA_MULTIARCH inline VectorType primitiveGradient() const
     {
-        return Base::normal();
+        VectorType normal = Base::normal();
+        normal.normalize();
+        return normal;
+        // return Base::normal();
     }
+
 
 private:
 
-    PONCA_MULTIARCH inline void findMinDirection();
+    PONCA_MULTIARCH inline void setTangentPlane()
+    {
+        m_P.col(0) = Base::getFrameU();
+        m_P.col(1) = Base::getFrameV();
+    }
 
 };
 
@@ -77,12 +91,14 @@ private:
 template < class DataPoint, class _WFunctor, typename T>
     using NormalCovariance3DFit =
         Ponca::NormalCovariance3D<DataPoint, _WFunctor,
-            Ponca::MeanPlaneFitImpl<DataPoint, _WFunctor,
+            Ponca::CovariancePlaneFitImpl<DataPoint, _WFunctor,
+                Ponca::CovarianceFitBase<DataPoint, _WFunctor,
+            // Ponca::MeanPlaneFitImpl<DataPoint, _WFunctor,
                     Ponca::MeanNormal<DataPoint, _WFunctor,
                         Ponca::MeanPosition<DataPoint, _WFunctor,
                             Ponca::LocalFrame<DataPoint, _WFunctor,
                                 Ponca::Plane<DataPoint, _WFunctor,
-                                    Ponca::PrimitiveBase<DataPoint,_WFunctor,T>>>>>>>;
+                                    Ponca::PrimitiveBase<DataPoint,_WFunctor,T>>>>>>>>;
 
 
 #include "normalCovariance3DFit.hpp"

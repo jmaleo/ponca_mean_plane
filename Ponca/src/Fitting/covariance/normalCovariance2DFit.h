@@ -79,12 +79,14 @@ public:
 template < class DataPoint, class _WFunctor, typename T>
     using NormalCovariance2DFit =
         Ponca::NormalCovariance2D<DataPoint, _WFunctor,
-            Ponca::MeanPlaneFitImpl<DataPoint, _WFunctor,
+            Ponca::CovariancePlaneFitImpl<DataPoint, _WFunctor,
+                Ponca::CovarianceFitBase<DataPoint, _WFunctor,
+                // Ponca::MeanPlaneFit<DataPoint, _WFunctor,
                     Ponca::MeanNormal<DataPoint, _WFunctor,
                         Ponca::MeanPosition<DataPoint, _WFunctor,
                             Ponca::LocalFrame<DataPoint, _WFunctor,
                                 Ponca::Plane<DataPoint, _WFunctor,
-                                    Ponca::PrimitiveBase<DataPoint,_WFunctor,T>>>>>>>;
+                                    Ponca::PrimitiveBase<DataPoint,_WFunctor,T>>>>>>>>;
 
 
 #include "normalCovariance2DFit.hpp"

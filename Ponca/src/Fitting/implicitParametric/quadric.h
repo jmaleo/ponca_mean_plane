@@ -21,7 +21,8 @@ class Quadric : public T
 protected:
     enum
     {
-        check = Base::PROVIDES_PRIMITIVE_BASE,
+        check = Base::PROVIDES_PRIMITIVE_BASE &&
+                Base::PROVIDES_LOCAL_FRAME,
         PROVIDES_ALGEBRAIC_QUADRIC,
         PROVIDES_NORMAL_DERIVATIVE,
     };
@@ -78,25 +79,49 @@ public:
 
     /*! \brief Approximation of the scalar field gradient at the evaluation point */
     PONCA_MULTIARCH inline VectorType primitiveGradient () const {
-        VectorType n = primitiveGradient( VectorType(0) );
+        VectorType n = primitiveGradient( project( Base::m_w.basisCenter() ) );
         return n / n.norm();
     }
+    
+    PONCA_MULTIARCH inline const Scalar f_a ( ) const { return m_coefficients(0); }
+    PONCA_MULTIARCH inline const Scalar f_b ( ) const { return m_coefficients(1); }
+    PONCA_MULTIARCH inline const Scalar f_c ( ) const { return m_coefficients(2); }
+    PONCA_MULTIARCH inline const Scalar f_e ( ) const { return m_coefficients(3); }
+    PONCA_MULTIARCH inline const Scalar f_f ( ) const { return m_coefficients(4); }
+    PONCA_MULTIARCH inline const Scalar f_g ( ) const { return m_coefficients(5); }
+    PONCA_MULTIARCH inline const Scalar f_l ( ) const { return m_coefficients(6); }
+    PONCA_MULTIARCH inline const Scalar f_m ( ) const { return m_coefficients(7); }
+    PONCA_MULTIARCH inline const Scalar f_n ( ) const { return m_coefficients(8); }
+    PONCA_MULTIARCH inline const Scalar f_d ( ) const { return m_coefficients(9); }
 
-    PONCA_MULTIARCH inline const Scalar f_xx ( ) const { return Scalar(2) * m_coefficients(0); }
-    PONCA_MULTIARCH inline const Scalar f_yy () const { return Scalar(2) * m_coefficients(1); }
-    PONCA_MULTIARCH inline const Scalar f_zz () const { return Scalar(2) * m_coefficients(2); }
-    PONCA_MULTIARCH inline const Scalar f_xy () const { return m_coefficients(3); }
-    PONCA_MULTIARCH inline const Scalar f_yz () const { return m_coefficients(4); }
-    PONCA_MULTIARCH inline const Scalar f_xz () const { return m_coefficients(5); }
+
+    PONCA_MULTIARCH inline const Scalar f_xx ( ) const { return Scalar(2) * f_a(); }
+    PONCA_MULTIARCH inline const Scalar f_yy () const { return Scalar(2) * f_b(); }
+    PONCA_MULTIARCH inline const Scalar f_zz () const { return Scalar(2) * f_c(); }
+    PONCA_MULTIARCH inline const Scalar f_xy () const { return f_e(); }
+    PONCA_MULTIARCH inline const Scalar f_yz () const { return f_f(); }
+    PONCA_MULTIARCH inline const Scalar f_xz () const { return f_g(); }
     
     PONCA_MULTIARCH inline const Scalar f_x  ( VectorType _q = VectorType::Zero() ) const { 
-        return Scalar(2) * m_coefficients(0) * _q(0) + m_coefficients(3) * _q(1) + m_coefficients(5) * _q(2) + m_coefficients(6);  
+        Scalar two = Scalar(2);
+        Scalar x = _q(0);
+        Scalar y = _q(1);
+        Scalar z = _q(2);
+        return two * f_a() * x + f_e() * y + f_g() * z + f_l();
     }
     PONCA_MULTIARCH inline const Scalar f_y  ( VectorType _q = VectorType::Zero() ) const { 
-        return Scalar(2) * m_coefficients(1) * _q(1) + m_coefficients(3) * _q(0) + m_coefficients(4) * _q(2) + m_coefficients(7);    
+        Scalar two = Scalar(2);
+        Scalar x = _q(0);
+        Scalar y = _q(1);
+        Scalar z = _q(2);
+        return two * f_b() * y + f_e() * x + f_f() * z + f_m();
     }
     PONCA_MULTIARCH inline const Scalar f_z  ( VectorType _q = VectorType::Zero() ) const { 
-        return Scalar(2) * m_coefficients(2) * _q(2) + m_coefficients(4) * _q(1) + m_coefficients(5) * _q(0) + m_coefficients(8);  
+        Scalar two = Scalar(2);
+        Scalar x = _q(0);
+        Scalar y = _q(1);
+        Scalar z = _q(2);
+        return two * f_c() * z + f_f() * y + f_g() * x + f_n();
     }
 
     PONCA_MULTIARCH inline const MatrixType dNormal() const {
@@ -132,7 +157,7 @@ public:
         PONCA_MULTIARCH_STD_MATH(pow);
         Scalar two = Scalar(2);
         Scalar fz2 = pow ( f_z(_q), two ); 
-        return ( f_x(_q) * f_y(_q) ) / fz2;
+        return Scalar(1) + ( f_x(_q) * f_y(_q) ) / fz2;
     }
 
     PONCA_MULTIARCH inline const Scalar dG ( VectorType _q = VectorType::Zero() ) const { 
@@ -179,12 +204,12 @@ public:
         return ( Scalar(1) / ( fz2 * magnitude(_q) ) ) * mat.determinant();
     }
 
-    // PONCA_MULTIARCH inline Scalar kmin () const { return m_kmin; }
-    // PONCA_MULTIARCH inline Scalar kmax () const { return m_kmax; }
-    // PONCA_MULTIARCH inline Scalar kMean () const { return (m_kmin + m_kmax) / Scalar(2); }
-    // PONCA_MULTIARCH inline Scalar GaussianCurvature () const { return m_kmin * m_kmax; }
-    // PONCA_MULTIARCH inline VectorType kminDirection() const { return m_dmin; }
-    // PONCA_MULTIARCH inline VectorType kmaxDirection() const { return m_dmax; }
+    PONCA_MULTIARCH inline Scalar kmin () const { return m_kmin; }
+    PONCA_MULTIARCH inline Scalar kmax () const { return m_kmax; }
+    PONCA_MULTIARCH inline Scalar kMean () const { return (m_kmin + m_kmax) / Scalar(2); }
+    PONCA_MULTIARCH inline Scalar GaussianCurvature () const { return m_kmin * m_kmax; }
+    PONCA_MULTIARCH inline VectorType kminDirection() const { return m_dmin; }
+    PONCA_MULTIARCH inline VectorType kmaxDirection() const { return m_dmax; }
 
 
 }; //class Quadric

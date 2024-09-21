@@ -82,6 +82,7 @@ NormalCovariance2D<DataPoint, _WFunctor, T>::kmin() const {
     constexpr Scalar PI = Scalar(M_PI);
     Scalar factor = pow ( Base::m_w.evalScale(), four ) * PI / four;
     return sqrt( m_solver.eigenvalues()(0) / factor );
+    // return m_solver.eigenvalues()(0);
 }
 
 template < class DataPoint, class _WFunctor, typename T>
@@ -93,6 +94,7 @@ NormalCovariance2D<DataPoint, _WFunctor, T>::kmax() const {
     constexpr Scalar PI = Scalar(M_PI);
     Scalar factor = pow ( Base::m_w.evalScale(), four ) * PI / four;
     return sqrt( m_solver.eigenvalues()(1) / factor );
+    // return m_solver.eigenvalues()(1);
 }
 
 template < class DataPoint, class _WFunctor, typename T>

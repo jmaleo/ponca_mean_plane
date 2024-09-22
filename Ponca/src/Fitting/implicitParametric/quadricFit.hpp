@@ -64,13 +64,9 @@ FIT_RESULT
 QuadricFitImpl<DataPoint, _WFunctor, T>::constructTensor()
 {
 
-    auto res = constructTensor2();
+    // auto res = constructTensor2();
     // VectorType x = Base::project( Base::m_w.basisCenter() );
     VectorType x = Base::m_w.convertToLocalBasis( Base::m_w.basisCenter() ); // 0
-
-    // std::cout << "============" << std::endl;
-    // std::cout << "Potential : " << Base::potential(x) << std::endl;
-    // std::cout << "Algebraic parameters : " << Base::m_coefficients << std::endl;
 
     Matrix32 P = tangentPlane( Base::primitiveGradient(x) );
 
@@ -91,14 +87,14 @@ QuadricFitImpl<DataPoint, _WFunctor, T>::constructTensor()
 
     Vector2 eivals = eigW.eigenvalues().real();
     Matrix2 eivecs = eigW.eigenvectors().real();
-    // Base::m_kmin = eivals(0);
-    // Base::m_kmax = eivals(1);
+    Base::m_kmin = std::abs(eivals(0));
+    Base::m_kmax = std::abs(eivals(1));
     Base::m_dmin = P * eivecs.col(0);
     Base::m_dmax = P * eivecs.col(1);
     // Base::m_dmin = eivecs.col(0);
     // Base::m_dmax = eivecs.col(1);
 
-    if (std::abs( Base::m_kmin ) > std::abs( Base::m_kmax ))
+    if ( Base::m_kmin > Base::m_kmax )
     {
         std::swap(Base::m_kmin, Base::m_kmax);
         std::swap(Base::m_dmin, Base::m_dmax);

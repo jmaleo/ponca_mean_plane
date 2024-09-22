@@ -52,6 +52,8 @@ public:
 
     PONCA_MULTIARCH inline FIT_RESULT constructTensor ();
 
+    PONCA_MULTIARCH inline FIT_RESULT constructTensor2 ();
+
 protected:
 
     PONCA_MULTIARCH Matrix32 tangentPlane(const VectorType& n);

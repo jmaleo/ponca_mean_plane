@@ -64,21 +64,23 @@ FIT_RESULT
 QuadricFitImpl<DataPoint, _WFunctor, T>::constructTensor()
 {
 
-    VectorType evalProj = Base::project( Base::m_w.basisCenter() );
+    auto res = constructTensor2();
+    // VectorType x = Base::project( Base::m_w.basisCenter() );
+    VectorType x = Base::m_w.convertToLocalBasis( Base::m_w.basisCenter() ); // 0
 
     // std::cout << "============" << std::endl;
-    // std::cout << "Potential : " << Base::potential(evalProj) << std::endl;
+    // std::cout << "Potential : " << Base::potential(x) << std::endl;
     // std::cout << "Algebraic parameters : " << Base::m_coefficients << std::endl;
 
-    Matrix32 P = tangentPlane( Base::primitiveGradient(evalProj) );
+    Matrix32 P = tangentPlane( Base::primitiveGradient(x) );
 
     Matrix2 I; 
-    I << Base::dE(evalProj), Base::dF(evalProj),
-         Base::dF(evalProj), Base::dG(evalProj);
+    I << Base::dE(x), Base::dF(x),
+         Base::dF(x), Base::dG(x);
     
     Matrix2 II; 
-    II << Base::dL(evalProj), Base::dM(evalProj),
-         Base::dM(evalProj), Base::dN(evalProj);
+    II << Base::dL(x), Base::dM(x),
+         Base::dM(x), Base::dN(x);
 
 
     Matrix2 W = I.inverse() * II;
@@ -89,9 +91,8 @@ QuadricFitImpl<DataPoint, _WFunctor, T>::constructTensor()
 
     Vector2 eivals = eigW.eigenvalues().real();
     Matrix2 eivecs = eigW.eigenvectors().real();
-
-    Base::m_kmin = eivals(0);
-    Base::m_kmax = eivals(1);
+    // Base::m_kmin = eivals(0);
+    // Base::m_kmax = eivals(1);
     Base::m_dmin = P * eivecs.col(0);
     Base::m_dmax = P * eivecs.col(1);
     // Base::m_dmin = eivecs.col(0);
@@ -104,8 +105,52 @@ QuadricFitImpl<DataPoint, _WFunctor, T>::constructTensor()
     }
 
     return STABLE;
+}
 
+template < class DataPoint, class _WFunctor, typename T>
+FIT_RESULT
+QuadricFitImpl<DataPoint, _WFunctor, T>::constructTensor2()
+{
 
+    VectorType x = Base::project( Base::m_w.basisCenter() );
+    Scalar f_x, f_y, f_z;
+    f_x = Base::f_x(x);
+    f_y = Base::f_y(x);
+    f_z = Base::f_z(x);
+    Scalar f_x2 = f_x * f_x;
+    Scalar f_y2 = f_y * f_y;
+    Scalar f_z2 = f_z * f_z;
+    Scalar two = Scalar(2);
+
+    Scalar a = ( Base::f_xx() * (- Base::f_yy() * f_z2 + two * Base::f_yz() * f_y * f_z - Base::f_zz() * f_y2)
+            + Base::f_xy() * ( 
+                            Base::f_xy() * f_z2 
+                            + Base::f_yz() * ( -f_x*f_z - f_y*f_z - two * f_x*f_y - f_x*f_z ) 
+                            - Base::f_xz() * f_y * f_z + two * Base::f_zz()*f_x*f_y + two * Base::f_yy()*f_x*f_z + f_y2
+                            + Base::f_yz() * Base::f_yz() * f_x - Base::f_yy() * Base::f_zz() * f_x2 
+                )
+        );
+    
+    Scalar b = ( 
+          Base::f_xx() * ( f_z2 + f_y2 ) 
+        + Base::f_yy() * ( f_x2 + f_z2 )
+        + Base::f_zz() * ( f_x2 + f_y2 )
+        - two * Base::f_xy() * f_x * f_y
+        - two * Base::f_yz() * f_y * f_z
+        - Base::f_xz() * f_x * f_z
+        - Base::f_xy() * f_x * f_z
+    );
+
+    Scalar c = (
+        - f_x2 - f_y2 - f_z2
+    );
+
+    Scalar K = ( a / c ) / ( f_x2 + f_y2 + f_z2 );
+    Scalar H = Scalar(-1) * ( b / c ) / ( two * std::sqrt( f_x2 + f_y2 + f_z2 ) );
+                
+    Base::m_kmin = std::abs(H - std::sqrt( H*H - K ));
+    Base::m_kmax = std::abs(H + std::sqrt( H*H - K ));
+    return STABLE;
 }
 
 template<class DataPoint, class _WFunctor, typename T>

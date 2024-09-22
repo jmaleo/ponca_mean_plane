@@ -95,7 +95,7 @@ public:
     PONCA_MULTIARCH inline const Scalar f_d ( ) const { return m_coefficients(9); }
 
 
-    PONCA_MULTIARCH inline const Scalar f_xx ( ) const { return Scalar(2) * f_a(); }
+    PONCA_MULTIARCH inline const Scalar f_xx () const { return Scalar(2) * f_a(); }
     PONCA_MULTIARCH inline const Scalar f_yy () const { return Scalar(2) * f_b(); }
     PONCA_MULTIARCH inline const Scalar f_zz () const { return Scalar(2) * f_c(); }
     PONCA_MULTIARCH inline const Scalar f_xy () const { return f_e(); }
@@ -150,6 +150,7 @@ public:
         Scalar two = Scalar(2);
         Scalar fx2 = pow ( f_x(_q), two );
         Scalar fz2 = pow ( f_z(_q), two ); 
+        if ( fz2 <= 1e-6 ) fz2 = Scalar(1);
         return Scalar(1) + ( fx2 / fz2 );
     }
     
@@ -157,6 +158,7 @@ public:
         PONCA_MULTIARCH_STD_MATH(pow);
         Scalar two = Scalar(2);
         Scalar fz2 = pow ( f_z(_q), two ); 
+        if ( fz2 <= 1e-6 ) fz2 = Scalar(1);
         return Scalar(1) + ( f_x(_q) * f_y(_q) ) / fz2;
     }
 
@@ -165,6 +167,7 @@ public:
         Scalar two = Scalar(2);
         Scalar fy2 = pow ( f_y(_q), two );
         Scalar fz2 = pow ( f_z(_q), two ); 
+        if ( fz2 <= 1e-6 ) fz2 = Scalar(1);
         return Scalar(1) + ( fy2 / fz2 );
     }
 
@@ -173,10 +176,11 @@ public:
         static const Scalar one (1);
         static const Scalar two (2);
         Scalar fz2 = pow ( f_z(_q), two );
+        if ( fz2 <= 1e-6 ) fz2 = Scalar(1);
 
         MatrixType mat; 
         mat << f_xx(), f_xz(), f_x(_q), f_xz(), f_zz(), f_z(_q), f_x(_q), f_z(_q), Scalar(0);  
-
+        
         return ( Scalar(1) / ( fz2 * magnitude(_q) ) ) * mat.determinant();
     }
 
@@ -185,6 +189,7 @@ public:
         static const Scalar one (1);
         static const Scalar two (2);
         Scalar fz2 = pow ( f_z(_q), two );
+        if ( fz2 <= 1e-6 ) fz2 = Scalar(1);
 
         MatrixType mat; 
         mat << f_xy(), f_yz(), f_y(_q), f_xz(), f_zz(), f_z(_q), f_x(_q), f_z(_q), Scalar(0);  
@@ -197,6 +202,7 @@ public:
         static const Scalar one (1);
         static const Scalar two (2);
         Scalar fz2 = pow ( f_z(_q), two );
+        if ( fz2 <= 1e-6 ) fz2 = Scalar(1);
 
         MatrixType mat; 
         mat << f_yy(), f_yz(), f_y(_q), f_yz(), f_zz(), f_z(_q), f_y(_q), f_z(_q), Scalar(0);  

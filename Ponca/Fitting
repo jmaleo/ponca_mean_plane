@@ -27,7 +27,7 @@
 
 #include "src/Fitting/ellipsoid/hyperboloid.h"
 
-#include "src/Fitting/varifold.h"
+#include "src/Fitting/varifolds.h"
 
 #include "src/Fitting/implicitParametric/quadric.h"
 #include "src/Fitting/implicitParametric/quadricFit.h"

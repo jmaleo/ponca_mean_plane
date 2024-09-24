@@ -55,7 +55,7 @@ public:
 //! - normals are required
 //! 
 template<class DataPoint, class _WFunctor, typename T>
-class VarifoldImpl : public T
+class VarifoldsImpl : public T
 {
     PONCA_FITTING_DECLARE_DEFAULT_TYPES
     PONCA_FITTING_DECLARE_MATRIX_TYPE
@@ -99,7 +99,7 @@ protected:
     Mat32 tangentPlane() const;
 
 public:
-    PONCA_EXPLICIT_CAST_OPERATORS(VarifoldImpl,varifoldImpl)
+    PONCA_EXPLICIT_CAST_OPERATORS(VarifoldsImpl,varifoldsImpl)
     // void init(const VectorType& x_l0, const VectorType& n_l0);
     void init(const VectorType& _evalPos);
     PONCA_FITTING_DECLARE_ADDNEIGHBOR
@@ -129,7 +129,7 @@ public:
 
 template<class D, class W, typename T>
 //using Varifold = v1::Varifold<D,W,>;
- using Varifold = VarifoldImpl<D,W,
+ using VarifoldsCovPlane = VarifoldsImpl<D,W,
     Ponca::CovariancePlaneFitImpl<D, W,
         Ponca::CovarianceFitBase<D, W,
             Ponca::MeanPosition<D, W,
@@ -137,5 +137,14 @@ template<class D, class W, typename T>
                     Ponca::LocalFrame<D, W,
                         Ponca::Plane<D, W, T>>>>>>>;
 
-#include "varifold.hpp"
+template<class D, class W, typename T>
+//using Varifold = v1::Varifold<D,W,>;
+ using VarifoldsMeanPlane = VarifoldsImpl<D,W,
+    Ponca::MeanPlaneFitImpl<D, W,
+            Ponca::MeanPosition<D, W,
+                Ponca::MeanNormal<D, W,
+                    Ponca::LocalFrame<D, W,
+                        Ponca::Plane<D, W, T>>>>>>;
+
+#include "varifolds.hpp"
 } //namespace Ponca

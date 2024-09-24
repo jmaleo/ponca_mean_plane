@@ -1,7 +1,7 @@
 
 template<class DataPoint, class _WFunctor, typename T>
 void 
-VarifoldImpl<DataPoint, _WFunctor, T>::init(
+VarifoldsImpl<DataPoint, _WFunctor, T>::init(
     const VectorType& _evalPos)
 {
     Base::init(_evalPos);
@@ -24,7 +24,7 @@ VarifoldImpl<DataPoint, _WFunctor, T>::init(
 
 template<class DataPoint, class _WFunctor, typename T>
 bool 
-VarifoldImpl<DataPoint, _WFunctor, T>::addLocalNeighbor(
+VarifoldsImpl<DataPoint, _WFunctor, T>::addLocalNeighbor(
     Scalar w, const VectorType &localQ, const DataPoint &attributes)
 {
     auto res = true;
@@ -69,7 +69,7 @@ VarifoldImpl<DataPoint, _WFunctor, T>::addLocalNeighbor(
 
 template<class DataPoint, class _WFunctor, typename T>
 FIT_RESULT 
-VarifoldImpl<DataPoint, _WFunctor, T>::finalize()
+VarifoldsImpl<DataPoint, _WFunctor, T>::finalize()
 {
 
     if ( ! m_planeIsReady ){
@@ -114,8 +114,8 @@ VarifoldImpl<DataPoint, _WFunctor, T>::finalize()
 }
 
 template<class DataPoint, class _WFunctor, typename T>
-typename VarifoldImpl<DataPoint, _WFunctor, T>::Mat32 
-VarifoldImpl<DataPoint, _WFunctor, T>::tangentPlane() const
+typename VarifoldsImpl<DataPoint, _WFunctor, T>::Mat32 
+VarifoldsImpl<DataPoint, _WFunctor, T>::tangentPlane() const
 {
     Mat32 B;
     B.col(0) = Base::getFrameU();
@@ -125,7 +125,7 @@ VarifoldImpl<DataPoint, _WFunctor, T>::tangentPlane() const
 
 template<class DataPoint, class _WFunctor, typename T>
 void
-VarifoldImpl<DataPoint, _WFunctor, T>::reorientPlane () {
+VarifoldsImpl<DataPoint, _WFunctor, T>::reorientPlane () {
     VectorType planeNormal = Base::primitiveGradient();
     VectorType meanNormal = Base::meanNormalVector();
     if (planeNormal.dot(meanNormal) < 0) {
@@ -139,15 +139,15 @@ VarifoldImpl<DataPoint, _WFunctor, T>::reorientPlane () {
 
 
 template<class DataPoint, class _WFunctor, typename T>
-typename VarifoldImpl<DataPoint, _WFunctor, T>::VectorType 
-VarifoldImpl<DataPoint, _WFunctor, T>::project(const VectorType& p) const
+typename VarifoldsImpl<DataPoint, _WFunctor, T>::VectorType 
+VarifoldsImpl<DataPoint, _WFunctor, T>::project(const VectorType& p) const
 {
     return p - (p - m_sumP).dot(m_n_l0) * m_n_l0;
 }
 
 template<class DataPoint, class _WFunctor, typename T>
-typename VarifoldImpl<DataPoint, _WFunctor, T>::VectorType 
-VarifoldImpl<DataPoint, _WFunctor, T>::primitiveGradient(const VectorType&) const
+typename VarifoldsImpl<DataPoint, _WFunctor, T>::VectorType 
+VarifoldsImpl<DataPoint, _WFunctor, T>::primitiveGradient(const VectorType&) const
 {
     return m_n_l0;
 }

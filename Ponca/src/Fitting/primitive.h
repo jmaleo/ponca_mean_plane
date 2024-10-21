@@ -119,6 +119,8 @@ public:
         return m_eCurrentState = STABLE;
     }
 
+    PONCA_MULTIARCH inline VectorType barycenter() const { return m_w.basisCenter(); }
+
 }; //class Primitive
 
 

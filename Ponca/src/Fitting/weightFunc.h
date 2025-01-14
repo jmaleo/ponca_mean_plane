@@ -32,6 +32,7 @@ public:
     using Scalar =  typename DataPoint::Scalar;
     /*! \brief Vector type from DataPoint */
     using VectorType =  typename DataPoint::VectorType;
+    using ScalarArray = Eigen::Matrix<Scalar, 1, DataPoint::Dim>;
     /*! \brief Matrix type from DataPoint */
     using MatrixType = typename DataPoint::MatrixType;
     /*! \brief Return type of the method #w() */
@@ -182,6 +183,15 @@ public:
     /*! \brief Access to the evaluation position set during the initialization */
     PONCA_MULTIARCH inline const VectorType & evalPos() const { return m_p; }
 
+
+    PONCA_MULTIARCH inline Scalar w(const VectorType& _q,
+        const VectorType& _center) const;
+
+    PONCA_MULTIARCH inline ScalarArray spacedw(const VectorType& _q,
+        const VectorType& _center) const;
+
+    PONCA_MULTIARCH inline MatrixType spaced2w(const VectorType& _q,
+        const VectorType& _center) const;
 protected:
     Scalar       m_t;  /*!< \brief Evaluation scale */
     WeightKernel m_wk; /*!< \brief 1D function applied to weight queries */

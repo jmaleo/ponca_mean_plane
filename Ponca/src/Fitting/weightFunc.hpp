@@ -90,4 +90,45 @@ DistWeightFunc<DataPoint, WeightKernel>::scaleSpaced2w(   const VectorType& _q,
     return result;
 }
 
+template <class DataPoint, class WeightKernel>
+typename DistWeightFunc<DataPoint, WeightKernel>::Scalar
+DistWeightFunc<DataPoint, WeightKernel>::w(const VectorType& _q, const VectorType& _center) const
+{
+    VectorType q = _q - _center;
+    Scalar d  = q.norm();
+    return (d <= m_t) ? m_wk.f(d/m_t) : Scalar(0.);
+}
 
+template <class DataPoint, class WeightKernel>
+typename DistWeightFunc<DataPoint, WeightKernel>::ScalarArray
+DistWeightFunc<DataPoint, WeightKernel>::spacedw(const VectorType& _q, const VectorType& _center) const
+{
+    static_assert(WeightKernel::isDValid, "First order derivatives are required");
+    VectorType result = VectorType::Zero();
+    VectorType q = _q - _center;
+    Scalar d = q.norm();
+    if (d <= m_t && d != Scalar(0.)) result = (q / (d * m_t)) * m_wk.df(d/m_t);
+    ScalarArray res = ScalarArray::Zero();
+    res.template segment<int(DataPoint::Dim)>(0) = - result.transpose();
+    return res;
+}
+
+template <class DataPoint, class WeightKernel>
+typename DistWeightFunc<DataPoint, WeightKernel>::MatrixType
+DistWeightFunc<DataPoint, WeightKernel>::spaced2w(const VectorType& _q, const VectorType& _center) const
+{
+    static_assert(WeightKernel::isDDValid, "Second order derivatives are required");
+    MatrixType result = MatrixType::Zero();
+    VectorType q = _q - _center;
+    Scalar d = q.norm();
+    if (d <= m_t && d != Scalar(0.))
+    {
+        Scalar der = m_wk.df(d/m_t);
+        result = q*q.transpose()/d*(m_wk.ddf(d/m_t)/m_t - der/d);
+        result.diagonal().array() += der;
+        result *= Scalar(1.)/(m_t*d);
+    }
+    MatrixType res = MatrixType::Zero();
+    res.template bottomRightCorner<DataPoint::Dim,DataPoint::Dim>() = result;
+    return result;
+}

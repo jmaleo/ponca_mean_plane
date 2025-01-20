@@ -77,6 +77,35 @@ public:
     static constexpr bool isDDValid = true;
 };//class SmoothWeightKernel
 
+/*!
+    \brief Smooth WeightKernel defined in \f$\left[0 : 1\right]\f$
+    \todo Add a degree value as template parameter (in this class or another one), with specialized functions for 2
+
+    \inherit Concept::WeightKernelConcept
+*/
+template <typename _Scalar>
+class SixSmoothWeightKernel
+{
+public:
+    /*! \brief Scalar type defined outside the class*/
+    typedef _Scalar Scalar;
+
+    // Functor
+    /*! \brief Defines the smooth weighting function \f$ w(x) = (x^2-1)^2 \f$ */
+    PONCA_MULTIARCH inline Scalar f  (const Scalar& _x) const { Scalar v = _x*_x - Scalar(1.); return v*v*v*v*v*v; }
+    /*! \brief Defines the smooth first order weighting function \f$ \nabla w(x) = 4x(x^2-1) \f$ */
+    PONCA_MULTIARCH inline Scalar df (const Scalar& _x) const {
+        return Scalar(12)*pow(_x, Scalar(11)) - Scalar(60) * pow(_x, Scalar(9)) + Scalar(120) * pow(_x, Scalar(7)) - Scalar(120) * pow(_x, Scalar(5)) + Scalar(60) * pow(_x, Scalar(3)) - Scalar(12) * _x;
+    }
+    /*! \brief Defines the smooth second order weighting function \f$ \nabla^2 w(x) = 12x^2-4 \f$ */
+    PONCA_MULTIARCH inline Scalar ddf(const Scalar& _x) const {
+        return Scalar(132) * pow(_x, Scalar(10)) - Scalar(540) * pow(_x, Scalar(8)) + Scalar(840) * pow(_x, Scalar(6)) - Scalar(600) * pow(_x, Scalar(4)) + Scalar(180) * pow(_x, Scalar(2)) - Scalar(12);
+    }
+    //! \brief #df is defined and valid on the definition interval
+    static constexpr bool isDValid = true;
+    //! \brief #ddf is defined and valid on the definition interval
+    static constexpr bool isDDValid = true;
+};//class SixSmoothWeightKernel
 
 /*!
     \brief Wendland WeightKernel defined in \f$\left[0 : 1\right]\f$

@@ -107,6 +107,55 @@ public:
     static constexpr bool isDDValid = true;
 };//class SixSmoothWeightKernel
 
+
+template <typename _Scalar>
+class FourSmoothWeightKernel
+{
+public:
+    /*! \brief Scalar type defined outside the class*/
+    typedef _Scalar Scalar;
+
+    // Functor
+    /*! \brief Defines the smooth weighting function \f$ w(x) = (x^2-1)^2 \f$ */
+    PONCA_MULTIARCH inline Scalar f  (const Scalar& _x) const { Scalar v = _x*_x - Scalar(1.); return v*v*v*v; }
+    /*! \brief Defines the smooth first order weighting function \f$ \nabla w(x) = 4x(x^2-1) \f$ */
+    PONCA_MULTIARCH inline Scalar df (const Scalar& _x) const {
+        return Scalar(8)*_x * ( _x * _x - Scalar(1) ) * ( _x * _x - Scalar(1) ) * ( _x * _x - Scalar(1) );
+    }
+    /*! \brief Defines the smooth second order weighting function \f$ \nabla^2 w(x) = 12x^2-4 \f$ */
+    PONCA_MULTIARCH inline Scalar ddf(const Scalar& _x) const {
+        return ( _x*_x - Scalar(1) ) * ( _x*_x - Scalar(1) ) * ( Scalar(8) * ( _x*_x - Scalar(1) ) + Scalar(48) * _x * _x );
+    }
+    //! \brief #df is defined and valid on the definition interval
+    static constexpr bool isDValid = true;
+    //! \brief #ddf is defined and valid on the definition interval
+    static constexpr bool isDDValid = true;
+};//class FourSmoothWeightKernel
+
+template <typename _Scalar>
+class ThreeSmoothWeightKernel
+{
+public:
+    /*! \brief Scalar type defined outside the class*/
+    typedef _Scalar Scalar;
+
+    // Functor
+    /*! \brief Defines the smooth weighting function \f$ w(x) = (x^2-1)^2 \f$ */
+    PONCA_MULTIARCH inline Scalar f  (const Scalar& _x) const { Scalar v = _x*_x - Scalar(1.); return v*v*v; }
+    /*! \brief Defines the smooth first order weighting function \f$ \nabla w(x) = 4x(x^2-1) \f$ */
+    PONCA_MULTIARCH inline Scalar df (const Scalar& _x) const {
+        return Scalar(6)*_x - ( Scalar(8) * _x * _x - Scalar(1) ) * ( Scalar(8) * _x * _x - Scalar(1) );
+    }
+    /*! \brief Defines the smooth second order weighting function \f$ \nabla^2 w(x) = 12x^2-4 \f$ */
+    PONCA_MULTIARCH inline Scalar ddf(const Scalar& _x) const {
+        return ( _x*_x - Scalar(1) ) * ( Scalar(6) * ( _x*_x - Scalar(1) ) + Scalar(24) * _x * _x );
+    }
+    //! \brief #df is defined and valid on the definition interval
+    static constexpr bool isDValid = true;
+    //! \brief #ddf is defined and valid on the definition interval
+    static constexpr bool isDDValid = true;
+};//class ThreeSmoothWeightKernel
+
 /*!
     \brief Wendland WeightKernel defined in \f$\left[0 : 1\right]\f$
 
